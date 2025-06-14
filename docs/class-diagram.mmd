@@ -1,0 +1,45 @@
+classDiagram
+  class User {
+    +string Email
+    +string Password
+  }
+  class Url {
+    +string ID
+    +string Url
+    +uint TotalHits
+  }
+  note for Url "ID - short code"
+  Url "*" -- "0..1" User
+  ClickStats --* Url
+  ClickStats: +uint Timestamp
+
+  class UserService {
+    <<interface>>
+    +Create() User
+    +Update(User) User
+    +Delete(userId: string)
+    +GetById(id: string) User
+    +GetByEmail(email: string) User
+  }
+  UserService ..> User
+  class UrlService {
+    <<interface>>
+    +Create(url: string, urlId: string) Url
+    +Delete(urlId: string)
+  }
+  UrlService ..> Url
+  class UrlStatsService {
+    <<interface>>
+    +RecordClick(urlId: string)
+    +GetTotalClicks(urlId: string) uint
+    +GetClickStats(urlId: string) DailyStat[]
+  }
+  Url <.. UrlStatsService
+  UrlStatsService ..> ClickStats
+  UrlStatsService ..> DailyStat
+
+  class DailyStat {
+    <<struct>>
+    +string date
+    +uint clicks
+  }
