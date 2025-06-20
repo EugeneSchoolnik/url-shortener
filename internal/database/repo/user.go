@@ -1,10 +1,8 @@
 package repo
 
 import (
-	"errors"
 	"url-shortener/internal/model"
 
-	"github.com/jackc/pgx/v5/pgconn"
 	"gorm.io/gorm"
 )
 
@@ -18,12 +16,6 @@ func NewUserRepo(db *gorm.DB) *UserRepo {
 
 func (r *UserRepo) Create(user *model.User) error {
 	if err := r.db.Create(user).Error; err != nil {
-		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) {
-			if pgErr.Code == "23505" {
-				return gorm.ErrDuplicatedKey // 23505 = unique_violation
-			}
-		}
 		return err
 	}
 	return nil

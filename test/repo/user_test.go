@@ -3,6 +3,7 @@ package repo_test
 import (
 	"testing"
 	"url-shortener/internal/database/repo"
+	"url-shortener/internal/lib/pg"
 	"url-shortener/internal/model"
 
 	"github.com/stretchr/testify/assert"
@@ -56,7 +57,7 @@ func TestUserRepo(t *testing.T) {
 		err = repo.Delete("abc123")
 		assert.NoError(t, err)
 		_, err = repo.ById("abc123")
-		assert.Error(t, err)
+		assert.ErrorIs(t, err, gorm.ErrRecordNotFound)
 
 		// TODO: ContextById
 		// TODO: ContextByEmail
@@ -68,10 +69,10 @@ func TestUserRepo(t *testing.T) {
 		assert.NoError(t, err)
 
 		err = repo.Create(&model.User{ID: "abc123", Email: "another@example.com", Password: "12345"})
-		assert.ErrorIs(t, err, gorm.ErrDuplicatedKey)
+		assert.Equal(t, pg.ParsePGError(err).Code, "23505")
 
 		err = repo.Create(&model.User{ID: "another", Email: "alice@example.com", Password: "12345"})
-		assert.ErrorIs(t, err, gorm.ErrDuplicatedKey)
+		assert.Equal(t, pg.ParsePGError(err).Code, "23505")
 
 		// ByEmail
 		_, err = repo.ByEmail("notfound@example.com")
