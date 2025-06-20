@@ -44,8 +44,17 @@ func TestUserRepo(t *testing.T) {
 		assert.Equal(t, "1234567", found.Password)
 		assert.Equal(t, user.Email, found.Email)
 
+		// Update with zero values
+		err = repo.Update(&model.User{ID: "abc123", Email: "", Password: "newpass"})
+		assert.NoError(t, err)
+		found, err = repo.ById("abc123")
+		assert.NoError(t, err)
+		assert.Equal(t, "newpass", found.Password)
+		assert.Equal(t, user.Email, found.Email)
+
 		// Delete
 		err = repo.Delete("abc123")
+		assert.NoError(t, err)
 		_, err = repo.ById("abc123")
 		assert.Error(t, err)
 
