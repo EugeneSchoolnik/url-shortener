@@ -29,13 +29,13 @@ func TestUserService_Create(t *testing.T) {
 
 	tests := []struct {
 		name       string
-		argUserDto *dto.CreateUser
+		argUserDto *model.User
 		mockSetup  func(r *mocks.UserRepo)
 		wantErr    error
 	}{
 		{
 			name:       "success",
-			argUserDto: &dto.CreateUser{Email: "example@email.com", Password: "12345678"},
+			argUserDto: &model.User{Email: "example@email.com", Password: "12345678"},
 			mockSetup: func(r *mocks.UserRepo) {
 				r.On("Create", mock.Anything).Return(nil).Once()
 			},
@@ -43,7 +43,7 @@ func TestUserService_Create(t *testing.T) {
 		},
 		{
 			name:       "success with duplicate id",
-			argUserDto: &dto.CreateUser{Email: "example@email.com", Password: "12345678"},
+			argUserDto: &model.User{Email: "example@email.com", Password: "12345678"},
 			mockSetup: func(r *mocks.UserRepo) {
 				r.On("Create", mock.Anything).Return(makeDuplicateKeyError("users_pkey")).Once()
 				r.On("Create", mock.Anything).Return(nil).Once()
@@ -51,23 +51,8 @@ func TestUserService_Create(t *testing.T) {
 			wantErr: nil,
 		},
 		{
-			name:       "invalid email",
-			argUserDto: &dto.CreateUser{Email: "invalid.email.com", Password: "12345678"},
-			wantErr:    service.ErrValidation,
-		},
-		{
-			name:       "too short password",
-			argUserDto: &dto.CreateUser{Email: "example@email.com", Password: "12345"},
-			wantErr:    service.ErrValidation,
-		},
-		{
-			name:       "too long password",
-			argUserDto: &dto.CreateUser{Email: "example@email.com", Password: strings.Repeat("0", 256)},
-			wantErr:    service.ErrValidation,
-		},
-		{
 			name:       "email taken",
-			argUserDto: &dto.CreateUser{Email: "example@email.com", Password: "12345678"},
+			argUserDto: &model.User{Email: "example@email.com", Password: "12345678"},
 			mockSetup: func(r *mocks.UserRepo) {
 				r.On("Create", mock.Anything).Return(makeDuplicateKeyError("idx_users_email")).Once()
 			},
@@ -75,7 +60,7 @@ func TestUserService_Create(t *testing.T) {
 		},
 		{
 			name:       "unexpected error",
-			argUserDto: &dto.CreateUser{Email: "example@email.com", Password: "12345678"},
+			argUserDto: &model.User{Email: "example@email.com", Password: "12345678"},
 			mockSetup: func(r *mocks.UserRepo) {
 				r.On("Create", mock.Anything).Return(errors.New("unexpected error")).Once()
 			},
@@ -92,26 +77,20 @@ func TestUserService_Create(t *testing.T) {
 
 			s := user.New(repo, slog.Default())
 
-			var want *model.User
-			if tt.wantErr == nil {
-				want = tt.argUserDto.Model()
-			}
-
-			got, err := s.Create(tt.argUserDto)
+			err := s.Create(tt.argUserDto)
 			if tt.wantErr != err && !errors.Is(err, tt.wantErr) {
 				t.Errorf("UserService.Create() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			// Check ID
-			if got != nil {
-				if len(got.ID) != idSize {
-					t.Errorf("got.ID size = %v, want %v", len(got.ID), idSize)
+			if err == nil {
+				if len(tt.argUserDto.ID) != idSize {
+					t.Errorf("tt.argUserDto.ID size = %v, want %v", len(tt.argUserDto.ID), idSize)
 				}
-				want.ID = got.ID // we've already checked it
 			}
-			if !reflect.DeepEqual(got, want) {
-				t.Errorf("UserService.Create() = %v, want %v", got, want)
-			}
+			// if !reflect.DeepEqual(got, want) {
+			// 	t.Errorf("UserService.Create() = %v, want %v", got, want)
+			// }
 		})
 	}
 }

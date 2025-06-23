@@ -41,24 +41,17 @@ const idSize = 12
 
 var idGenerator = nanoid.New(idAlphabet, idSize)
 
-func (s *UserService) Create(userDto *dto.CreateUser) (*model.User, error) {
+func (s *UserService) Create(user *model.User) error {
 	const op = "service.user.Create"
 	log := s.log.With(slog.String("op", op))
-
-	err := service.Validate.Struct(userDto)
-	if err != nil {
-		log.Info("validation failed", sl.Err(err))
-		return nil, service.PrettyValidationError(err.(validator.ValidationErrors))
-	}
 
 GenerateID:
 	id, err := idGenerator.ID()
 	if err != nil {
 		log.Error("failed to generate id", sl.Err(err))
-		return nil, service.ErrInternalError
+		return service.ErrInternalError
 	}
 
-	user := userDto.Model()
 	user.ID = id
 
 	err = s.repo.Create(user)
@@ -70,14 +63,14 @@ GenerateID:
 			case "users_pkey":
 				goto GenerateID
 			case "idx_users_email":
-				return nil, ErrEmailTaken
+				return ErrEmailTaken
 			}
 		}
-		return nil, service.ErrInternalError
+		return service.ErrInternalError
 	}
 
 	log.Info("user successfully created")
-	return user, nil
+	return nil
 }
 
 func (s *UserService) Update(id string, userDto *dto.UpdateUser) error {
