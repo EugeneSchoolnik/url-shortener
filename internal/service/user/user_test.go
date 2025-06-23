@@ -4,7 +4,6 @@ import (
 	"errors"
 	"log/slog"
 	"reflect"
-	"strings"
 	"testing"
 	"url-shortener/internal/model"
 	"url-shortener/internal/model/dto"
@@ -110,7 +109,7 @@ func TestUserService_Update(t *testing.T) {
 			name: "success",
 			args: args{
 				id:      "1234",
-				userDto: &dto.UpdateUser{Email: "example@email.com", Password: "12345678"},
+				userDto: &dto.UpdateUser{Email: "example@email.com"},
 			},
 			mockSetup: func(r *mocks.UserRepo) {
 				r.On("Update", mock.Anything).Return(nil).Once()
@@ -121,7 +120,7 @@ func TestUserService_Update(t *testing.T) {
 			name: "empty id",
 			args: args{
 				id:      "",
-				userDto: &dto.UpdateUser{Email: "example@email.com", Password: "12345678"},
+				userDto: &dto.UpdateUser{Email: "example@email.com"},
 			},
 			wantErr: service.ErrValidation,
 		},
@@ -129,23 +128,7 @@ func TestUserService_Update(t *testing.T) {
 			name: "invalid email",
 			args: args{
 				id:      "1234",
-				userDto: &dto.UpdateUser{Email: "invalid.email.com", Password: "12345678"},
-			},
-			wantErr: service.ErrValidation,
-		},
-		{
-			name: "too short password",
-			args: args{
-				id:      "1234",
-				userDto: &dto.UpdateUser{Email: "example@email.com", Password: "12345"},
-			},
-			wantErr: service.ErrValidation,
-		},
-		{
-			name: "too long password",
-			args: args{
-				id:      "1234",
-				userDto: &dto.UpdateUser{Email: "example@email.com", Password: strings.Repeat("0", 256)},
+				userDto: &dto.UpdateUser{Email: "invalid.email.com"},
 			},
 			wantErr: service.ErrValidation,
 		},
@@ -153,7 +136,7 @@ func TestUserService_Update(t *testing.T) {
 			name: "empty dto field",
 			args: args{
 				id:      "1234",
-				userDto: &dto.UpdateUser{Email: "", Password: "12345678"},
+				userDto: &dto.UpdateUser{Email: ""},
 			},
 			mockSetup: func(r *mocks.UserRepo) {
 				r.On("Update", mock.Anything).Return(nil).Once()
@@ -164,7 +147,7 @@ func TestUserService_Update(t *testing.T) {
 			name: "not found",
 			args: args{
 				id:      "404",
-				userDto: &dto.UpdateUser{Email: "example@email.com", Password: "12345678"},
+				userDto: &dto.UpdateUser{Email: "example@email.com"},
 			},
 			mockSetup: func(r *mocks.UserRepo) {
 				r.On("Update", mock.Anything).Return(gorm.ErrRecordNotFound).Once()
@@ -175,7 +158,7 @@ func TestUserService_Update(t *testing.T) {
 			name: "unxpected error",
 			args: args{
 				id:      "1234",
-				userDto: &dto.UpdateUser{Email: "example@email.com", Password: "12345678"},
+				userDto: &dto.UpdateUser{Email: "example@email.com"},
 			},
 			mockSetup: func(r *mocks.UserRepo) {
 				r.On("Update", mock.Anything).Return(errors.New("unexprect error")).Once()

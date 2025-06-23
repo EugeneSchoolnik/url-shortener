@@ -8,8 +8,7 @@ type CreateUser struct {
 }
 
 type UpdateUser struct {
-	Email    string `validate:"omitempty,email"`
-	Password string `validate:"omitempty,min=8,max=72"`
+	Email string `validate:"omitempty,email"`
 }
 
 type UserPublic struct {
@@ -21,7 +20,7 @@ func (dto *CreateUser) Model() *model.User {
 }
 
 func (dto *UpdateUser) Model() *model.User {
-	return &model.User{Email: dto.Email, Password: dto.Password}
+	return &model.User{Email: dto.Email}
 }
 
 func ToUserPublic(u *model.User) *UserPublic {
