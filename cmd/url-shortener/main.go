@@ -1,12 +1,16 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"log/slog"
+	"net/http"
 	"os"
 	"url-shortener/internal/config"
 	"url-shortener/internal/database"
 	"url-shortener/internal/lib/logger/sl"
+
+	"github.com/gin-gonic/gin"
 )
 
 const (
@@ -16,20 +20,52 @@ const (
 )
 
 func main() {
-	config := config.MustLoad()
-	log.Printf("config loaded: %v\n", config)
+	cfg := config.MustLoad()
+	log.Printf("config loaded: %v\n", cfg)
 
-	log := setupLogger(config.Env)
-	log.Info("starting url-shortener", slog.String("env", config.Env))
+	log := setupLogger(cfg.Env)
+	log.Info("starting url-shortener", slog.String("env", cfg.Env))
 	log.Debug("debug messages are enabled")
 
-	db, err := database.New(&config.Postgres)
+	db, err := database.New(&cfg.Postgres)
 	if err != nil {
 		log.Error("failed to init database: %s", sl.Err(err))
+		return
 	}
 	log.Info("database initialized")
 
 	_ = db
+
+	// init http server
+	router := NewRouter()
+
+	router.GET("/", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"hello": "world"})
+	})
+
+	server := NewServer(&cfg.HTTPServer, router)
+
+	log.Info(fmt.Sprintf("Starting server at %s:%s", cfg.HTTPServer.Host, cfg.HTTPServer.Port))
+	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		log.Error("server failed: %v", sl.Err(err))
+	}
+}
+
+func NewServer(cfg *config.HTTPServer, handler http.Handler) *http.Server {
+	return &http.Server{
+		Addr:         fmt.Sprintf("%s:%s", cfg.Host, cfg.Port),
+		Handler:      handler,
+		ReadTimeout:  cfg.Timeout,
+		WriteTimeout: cfg.Timeout,
+		IdleTimeout:  cfg.IdleTimeout,
+	}
+}
+
+func NewRouter() *gin.Engine {
+	router := gin.New()
+	router.Use(gin.Logger(), gin.Recovery())
+
+	return router
 }
 
 func setupLogger(env string) *slog.Logger {

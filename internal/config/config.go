@@ -25,10 +25,10 @@ type Postgres struct {
 }
 
 type HTTPServer struct {
-	Host         string        `yaml:"host" env-default:"localhost"`
-	Port         string        `yaml:"port" env-default:"8080"`
-	Timeout      time.Duration `yaml:"timeout" env-required:"true"`
-	IddleTimeout time.Duration `yaml:"iddle_timeout" env-required:"true"`
+	Host        string        `yaml:"host" env-default:"localhost"`
+	Port        string        `yaml:"port" env-default:"8080"`
+	Timeout     time.Duration `yaml:"timeout" env-required:"true"`
+	IdleTimeout time.Duration `yaml:"idle_timeout" env-required:"true"`
 }
 
 func MustLoad() *Config {

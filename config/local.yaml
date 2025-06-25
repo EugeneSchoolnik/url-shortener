@@ -9,4 +9,4 @@ http_server:
   host: localhost
   port: 8080
   timeout: 4s
-  iddle_timeout: 60s
+  idle_timeout: 60s
