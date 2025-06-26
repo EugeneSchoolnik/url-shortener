@@ -10,6 +10,7 @@ import (
 	"url-shortener/internal/config"
 	"url-shortener/internal/database"
 	"url-shortener/internal/database/repo"
+	"url-shortener/internal/handler/auth/login"
 	"url-shortener/internal/handler/auth/register"
 	"url-shortener/internal/lib/logger/sl"
 	"url-shortener/internal/service/auth"
@@ -54,6 +55,7 @@ func main() {
 
 	v1 := router.Group("/api/v1")
 	v1.POST("/auth/register", register.New(log, authService))
+	v1.POST("/auth/login", login.New(log, authService))
 
 	server := NewServer(&cfg.HTTPServer, router)
 

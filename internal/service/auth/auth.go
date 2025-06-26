@@ -92,7 +92,7 @@ func (s *AuthService) Login(email string, password string) (*model.User, string,
 		// no need for logs
 		return nil, "", err
 	}
-	fmt.Println(user, err)
+
 	if !s.ComparePassword(password, user.Password) {
 		log.Info("wrong password")
 		return nil, "", ErrInvalidCredentials
