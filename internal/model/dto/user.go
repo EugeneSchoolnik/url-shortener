@@ -12,6 +12,7 @@ type UpdateUser struct {
 }
 
 type UserPublic struct {
+	ID    string `json:"id"`
 	Email string `json:"email"`
 }
 
@@ -24,5 +25,5 @@ func (dto *UpdateUser) Model() *model.User {
 }
 
 func ToUserPublic(u *model.User) *UserPublic {
-	return &UserPublic{Email: u.Email}
+	return &UserPublic{ID: u.ID, Email: u.Email}
 }

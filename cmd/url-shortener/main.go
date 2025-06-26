@@ -6,9 +6,14 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"time"
 	"url-shortener/internal/config"
 	"url-shortener/internal/database"
+	"url-shortener/internal/database/repo"
+	"url-shortener/internal/handler/auth/register"
 	"url-shortener/internal/lib/logger/sl"
+	"url-shortener/internal/service/auth"
+	"url-shortener/internal/service/user"
 
 	"github.com/gin-gonic/gin"
 )
@@ -34,7 +39,11 @@ func main() {
 	}
 	log.Info("database initialized")
 
-	_ = db
+	// services
+	userRepo := repo.NewUserRepo(db)
+	userService := user.New(userRepo, log)
+	jwtService := auth.NewJWTService("secret", time.Hour)
+	authService := auth.New(userService, jwtService, log)
 
 	// init http server
 	router := NewRouter()
@@ -42,6 +51,9 @@ func main() {
 	router.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"hello": "world"})
 	})
+
+	v1 := router.Group("/api/v1")
+	v1.POST("/auth/register", register.New(log, authService))
 
 	server := NewServer(&cfg.HTTPServer, router)
 
