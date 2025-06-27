@@ -5,19 +5,16 @@ import (
 	"url-shortener/internal/database/repo"
 	"url-shortener/internal/lib/pg"
 	"url-shortener/internal/model"
+	"url-shortener/internal/testutils/testdb"
 
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 )
 
-func cleanUsersTable(db *gorm.DB) {
-	db.Exec("DELETE FROM users")
-}
-
 func TestUserRepo(t *testing.T) {
-	db := setupTestDB(t)
+	db := testdb.Get(t)
 
-	cleanUsersTable(db)
+	testdb.TruncateTables(t, "users")
 
 	repo := repo.NewUserRepo(db)
 
