@@ -10,8 +10,8 @@ import (
 	"url-shortener/internal/config"
 	"url-shortener/internal/database"
 	"url-shortener/internal/database/repo"
-	"url-shortener/internal/handler/auth/login"
-	"url-shortener/internal/handler/auth/register"
+	http_server "url-shortener/internal/http"
+	"url-shortener/internal/http/handler"
 	"url-shortener/internal/lib/logger/sl"
 	"url-shortener/internal/service/auth"
 	"url-shortener/internal/service/user"
@@ -47,15 +47,7 @@ func main() {
 	authService := auth.New(userService, jwtService, log)
 
 	// init http server
-	router := NewRouter()
-
-	router.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"hello": "world"})
-	})
-
-	v1 := router.Group("/api/v1")
-	v1.POST("/auth/register", register.New(log, authService))
-	v1.POST("/auth/login", login.New(log, authService))
+	router := http_server.NewRouter(log, &handler.Dependencies{AuthService: authService})
 
 	server := NewServer(&cfg.HTTPServer, router)
 
