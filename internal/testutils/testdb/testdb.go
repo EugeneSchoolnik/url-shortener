@@ -13,7 +13,7 @@ import (
 
 var db *gorm.DB
 
-func Get(t *testing.T) *gorm.DB {
+func New(t *testing.T) *gorm.DB {
 	testutils.LoadTestEnv(t)
 
 	dsn := os.Getenv("DB_DSN")

@@ -12,7 +12,7 @@ import (
 )
 
 func TestUserRepo(t *testing.T) {
-	db := testdb.Get(t)
+	db := testdb.New(t)
 
 	testdb.TruncateTables(t, "users")
 
