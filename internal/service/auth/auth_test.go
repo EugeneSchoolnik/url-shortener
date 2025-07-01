@@ -135,7 +135,7 @@ func TestAuthService_Login(t *testing.T) {
 					ID: "1234", Email: "example@email.com", Password: "$2a$10$another/hash",
 				}, nil).Once()
 			},
-			wantErr: auth.ErrInvalidCredentials,
+			wantErr: service.ErrInvalidCredentials,
 		},
 	}
 	for _, tt := range tests {

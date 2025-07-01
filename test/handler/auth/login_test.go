@@ -65,13 +65,13 @@ func TestLoginHandler(t *testing.T) {
 			name:      "invalid email",
 			body:      `{"email":"invalid.gmail.com","password":"12345678"}`,
 			wantCode:  http.StatusBadRequest,
-			wantError: "validation error: invalid email",
+			wantError: "field Email is not a valid email",
 		},
 		{
 			name:      "invalid password",
 			body:      `{"email":"example@gmail.com","password":"12345"}`,
 			wantCode:  http.StatusBadRequest,
-			wantError: "validation error: invalid password",
+			wantError: "field Password is not valid",
 		},
 		{
 			name:      "user not found",

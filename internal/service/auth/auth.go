@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"errors"
 	"fmt"
 	"log/slog"
 	"reflect"
@@ -14,12 +13,9 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var ErrInvalidCredentials = errors.New("invalid credentials")
-
 //go:generate mockery --name=UserService
 type UserService interface {
 	Create(user *model.User) error
-	Update(id string, userDto *dto.UpdateUser) error
 	Delete(id string) error
 	ByEmail(email string, withContext ...bool) (*model.User, error)
 	ById(id string, withContext ...bool) (*model.User, error)
@@ -83,7 +79,7 @@ func (s *AuthService) Login(email string, password string) (*model.User, string,
 	tag := field.Tag.Get("validate")
 	if err := service.Validate.Var(password, tag); err != nil {
 		log.Info("failed to validate password", sl.Err(err))
-		return nil, "", fmt.Errorf("%w: %s", service.ErrValidation, "invalid password")
+		return nil, "", fmt.Errorf("%w%s", service.ErrValidation, "field Password is not valid")
 	}
 
 	// email validation is inside this
@@ -95,7 +91,7 @@ func (s *AuthService) Login(email string, password string) (*model.User, string,
 
 	if !s.ComparePassword(password, user.Password) {
 		log.Info("wrong password")
-		return nil, "", ErrInvalidCredentials
+		return nil, "", service.ErrInvalidCredentials
 	}
 
 	token, err := s.jwtService.Generate(user.ID)

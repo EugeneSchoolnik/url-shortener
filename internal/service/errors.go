@@ -9,8 +9,15 @@ import (
 )
 
 var (
+	// auth
+	ErrInvalidToken       = errors.New("invalid token")
+	ErrInvalidCredentials = errors.New("invalid credentials")
+	// user
+	ErrUserNotFound = errors.New("user not found")
+	ErrEmailTaken   = errors.New("email's already taken")
+	// common
 	ErrInternalError = errors.New("internal server error")
-	ErrValidation    = errors.New("validation error")
+	ErrValidation    = errors.New("")
 	ErrNotFound      = errors.New("not found")
 )
 
@@ -28,5 +35,5 @@ func PrettyValidationError(validationErrs validator.ValidationErrors) error {
 		}
 	}
 
-	return fmt.Errorf("%w: %s", ErrValidation, strings.Join(errMsgs, ", "))
+	return fmt.Errorf("%w%s", ErrValidation, strings.Join(errMsgs, ", "))
 }

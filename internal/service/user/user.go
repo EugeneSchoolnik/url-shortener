@@ -7,11 +7,9 @@ import (
 	"url-shortener/internal/lib/logger/sl"
 	"url-shortener/internal/lib/pg"
 	"url-shortener/internal/model"
-	"url-shortener/internal/model/dto"
 	"url-shortener/internal/service"
 	"url-shortener/internal/util/nanoid"
 
-	"github.com/go-playground/validator/v10"
 	"gorm.io/gorm"
 )
 
@@ -63,44 +61,13 @@ GenerateID:
 			case "users_pkey":
 				goto GenerateID
 			case "idx_users_email":
-				return ErrEmailTaken
+				return service.ErrEmailTaken
 			}
 		}
 		return service.ErrInternalError
 	}
 
 	log.Info("user successfully created")
-	return nil
-}
-
-func (s *UserService) Update(id string, userDto *dto.UpdateUser) error {
-	const op = "service.user.Update"
-	log := s.log.With(slog.String("op", op))
-
-	if id == "" {
-		log.Info("id validation failed")
-		return fmt.Errorf("%w: %s", service.ErrValidation, "id is required")
-	}
-
-	err := service.Validate.Struct(userDto)
-	if err != nil {
-		log.Info("dto validation failed", sl.Err(err))
-		return service.PrettyValidationError(err.(validator.ValidationErrors))
-	}
-
-	user := userDto.Model()
-	user.ID = id
-
-	err = s.repo.Update(user)
-	if err != nil {
-		log.Error("failed to update user", sl.Err(err))
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return service.ErrNotFound
-		}
-		return service.ErrInternalError
-	}
-
-	log.Info("user successfully updated")
 	return nil
 }
 
@@ -128,7 +95,7 @@ func (s *UserService) ByEmail(email string, withContext ...bool) (*model.User, e
 
 	if err := service.Validate.Var(email, "email,required"); err != nil {
 		log.Info("email validation failed")
-		return nil, fmt.Errorf("%w: %s", service.ErrValidation, "invalid email")
+		return nil, fmt.Errorf("%w%s", service.ErrValidation, "field Email is not a valid email")
 	}
 
 	var user *model.User

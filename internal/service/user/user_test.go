@@ -6,7 +6,6 @@ import (
 	"reflect"
 	"testing"
 	"url-shortener/internal/model"
-	"url-shortener/internal/model/dto"
 	"url-shortener/internal/service"
 	"url-shortener/internal/service/user"
 	"url-shortener/internal/service/user/mocks"
@@ -55,7 +54,7 @@ func TestUserService_Create(t *testing.T) {
 			mockSetup: func(r *mocks.UserRepo) {
 				r.On("Create", mock.Anything).Return(makeDuplicateKeyError("idx_users_email")).Once()
 			},
-			wantErr: user.ErrEmailTaken,
+			wantErr: service.ErrEmailTaken,
 		},
 		{
 			name:       "unexpected error",
@@ -90,95 +89,6 @@ func TestUserService_Create(t *testing.T) {
 			// if !reflect.DeepEqual(got, want) {
 			// 	t.Errorf("UserService.Create() = %v, want %v", got, want)
 			// }
-		})
-	}
-}
-
-func TestUserService_Update(t *testing.T) {
-	type args struct {
-		id      string
-		userDto *dto.UpdateUser
-	}
-	tests := []struct {
-		name      string
-		args      args
-		mockSetup func(r *mocks.UserRepo)
-		wantErr   error
-	}{
-		{
-			name: "success",
-			args: args{
-				id:      "1234",
-				userDto: &dto.UpdateUser{Email: "example@email.com"},
-			},
-			mockSetup: func(r *mocks.UserRepo) {
-				r.On("Update", mock.Anything).Return(nil).Once()
-			},
-			wantErr: nil,
-		},
-		{
-			name: "empty id",
-			args: args{
-				id:      "",
-				userDto: &dto.UpdateUser{Email: "example@email.com"},
-			},
-			wantErr: service.ErrValidation,
-		},
-		{
-			name: "invalid email",
-			args: args{
-				id:      "1234",
-				userDto: &dto.UpdateUser{Email: "invalid.email.com"},
-			},
-			wantErr: service.ErrValidation,
-		},
-		{
-			name: "empty dto field",
-			args: args{
-				id:      "1234",
-				userDto: &dto.UpdateUser{Email: ""},
-			},
-			mockSetup: func(r *mocks.UserRepo) {
-				r.On("Update", mock.Anything).Return(nil).Once()
-			},
-			wantErr: nil,
-		},
-		{
-			name: "not found",
-			args: args{
-				id:      "404",
-				userDto: &dto.UpdateUser{Email: "example@email.com"},
-			},
-			mockSetup: func(r *mocks.UserRepo) {
-				r.On("Update", mock.Anything).Return(gorm.ErrRecordNotFound).Once()
-			},
-			wantErr: service.ErrNotFound,
-		},
-		{
-			name: "unxpected error",
-			args: args{
-				id:      "1234",
-				userDto: &dto.UpdateUser{Email: "example@email.com"},
-			},
-			mockSetup: func(r *mocks.UserRepo) {
-				r.On("Update", mock.Anything).Return(errors.New("unexprect error")).Once()
-			},
-			wantErr: service.ErrInternalError,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			repo := &mocks.UserRepo{}
-
-			if tt.mockSetup != nil {
-				tt.mockSetup(repo)
-			}
-
-			s := user.New(repo, slog.Default())
-
-			if err := s.Update(tt.args.id, tt.args.userDto); tt.wantErr != err && !errors.Is(err, tt.wantErr) {
-				t.Errorf("UserService.Update() error = %v, wantErr %v", err, tt.wantErr)
-			}
 		})
 	}
 }

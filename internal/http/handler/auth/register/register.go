@@ -8,7 +8,6 @@ import (
 	"url-shortener/internal/model"
 	"url-shortener/internal/model/dto"
 	"url-shortener/internal/service"
-	userService "url-shortener/internal/service/user"
 
 	"github.com/gin-gonic/gin"
 )
@@ -47,7 +46,7 @@ func New(log *slog.Logger, userRegisterer UserRegistrar) gin.HandlerFunc {
 			switch {
 			case errors.Is(err, service.ErrValidation):
 				code = http.StatusBadRequest
-			case errors.Is(err, userService.ErrEmailTaken):
+			case errors.Is(err, service.ErrEmailTaken):
 				code = http.StatusConflict
 			default:
 				code = http.StatusInternalServerError

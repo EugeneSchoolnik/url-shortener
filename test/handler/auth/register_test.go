@@ -59,13 +59,13 @@ func TestRegisterHandler(t *testing.T) {
 			name:      "invalid email",
 			body:      `{"user":{"email":"invalid.gmail.com","password":"12345678"}}`,
 			wantCode:  http.StatusBadRequest,
-			wantError: "validation error: field Email is not a valid email",
+			wantError: "field Email is not a valid email",
 		},
 		{
 			name:      "invalid password",
 			body:      `{"user":{"email":"example@gmail.com","password":"12345"}}`,
 			wantCode:  http.StatusBadRequest,
-			wantError: "validation error: field Password is not valid",
+			wantError: "field Password is not valid",
 		},
 		{
 			name:      "email taken",

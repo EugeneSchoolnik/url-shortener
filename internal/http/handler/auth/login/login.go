@@ -8,7 +8,6 @@ import (
 	"url-shortener/internal/model"
 	"url-shortener/internal/model/dto"
 	"url-shortener/internal/service"
-	"url-shortener/internal/service/auth"
 
 	"github.com/gin-gonic/gin"
 )
@@ -46,7 +45,7 @@ func New(log *slog.Logger, userAuthenticator UserAuthenticator) gin.HandlerFunc 
 			// no need for logs
 			var code int
 			switch {
-			case errors.Is(err, service.ErrValidation) || errors.Is(err, auth.ErrInvalidCredentials):
+			case errors.Is(err, service.ErrValidation) || errors.Is(err, service.ErrInvalidCredentials):
 				code = http.StatusBadRequest
 			case errors.Is(err, service.ErrNotFound):
 				code = http.StatusNotFound
