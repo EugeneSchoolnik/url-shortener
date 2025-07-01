@@ -4,6 +4,8 @@ import (
 	"testing"
 	"time"
 	"url-shortener/internal/service/auth"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestJWTService_Generate(t *testing.T) {
@@ -36,6 +38,11 @@ func TestJWTService_Generate(t *testing.T) {
 }
 
 func TestJWTService_Parse(t *testing.T) {
+	s := auth.NewJWTService("secret", time.Hour)
+
+	tokenStr, err := s.Generate("1234")
+	require.NoError(t, err)
+
 	tests := []struct {
 		name     string
 		tokenStr string
@@ -44,7 +51,7 @@ func TestJWTService_Parse(t *testing.T) {
 	}{
 		{
 			name:     "success",
-			tokenStr: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0IiwiZXhwIjoxNzUwNTgzMzk3LCJpYXQiOjE3NTA1Nzk3OTd9.9vUWCCID7qaawZD2Y10_Tmg1d4iVwK7aXdOi1l559Tc",
+			tokenStr: tokenStr,
 			want:     "1234",
 			wantErr:  false,
 		},
@@ -56,8 +63,6 @@ func TestJWTService_Parse(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := auth.NewJWTService("secret", time.Hour)
-
 			got, err := s.Parse(tt.tokenStr)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("JWTService.Parse() error = %v, wantErr %v", err, tt.wantErr)
