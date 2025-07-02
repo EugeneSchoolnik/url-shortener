@@ -25,6 +25,12 @@ const (
 	envProd  = "prod"
 )
 
+const (
+	envLocal = "local"
+	envDev   = "dev"
+	envProd  = "prod"
+)
+
 func main() {
 	cfg := config.MustLoad()
 	log.Printf("config loaded: %v\n", cfg)

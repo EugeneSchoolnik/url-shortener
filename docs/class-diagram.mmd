@@ -28,6 +28,7 @@ classDiagram
     <<interface>>
     +Register(user: CreateUserDTO) User, ~token: string~
     +Login(email, password: string) User, ~token: string~
+    +GetUserContext(id: string) User
     -hashPassword(password: string) string
     -comparePassword(password, hash: string)
   }
