@@ -20,10 +20,10 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
 
     steps:
       - uses: actions/checkout@v3
@@ -31,15 +31,17 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: "1.24"
+          go-version: 1.22
 
-      - name: Wait for Postgres
+      - name: Wait for Postgres to be ready
         run: |
-          until pg_isready -h postgres -p 5432; do
-            sleep 1
+          for i in {1..15}; do
+            nc -zv localhost 5432 && break
+            echo "Waiting for postgres..."
+            sleep 2
           done
 
-      - name: Run Tests
+      - name: Run tests
         env:
-          DB_DSN: "host=postgres user=postgres password=postgres dbname=url_shortener port=5432 sslmode=disable"
-        run: go test ./... -v
+          DB_DSN: "host=localhost user=postgres password=postgres dbname=url_shortener port=5432 sslmode=disable"
+        run: go test ./...
