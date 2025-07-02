@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"testing"
+	"url-shortener/internal/database"
 	"url-shortener/internal/testutils"
 
 	"gorm.io/driver/postgres"
@@ -31,6 +32,10 @@ func New(t *testing.T) *gorm.DB {
 
 	if err := sqlDB.Ping(); err != nil {
 		t.Fatalf("failed to ping db: %v", err)
+	}
+
+	if err := database.Migrate(db); err != nil {
+		t.Fatalf("failed to migrate: %v", err)
 	}
 
 	return db
