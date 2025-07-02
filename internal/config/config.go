@@ -25,21 +25,21 @@ type Postgres struct {
 }
 
 type HTTPServer struct {
-	Host         string        `yaml:"host" env-default:"localhost"`
-	Port         string        `yaml:"port" env-default:"8080"`
-	Timeout      time.Duration `yaml:"timeout" env-required:"true"`
-	IddleTimeout time.Duration `yaml:"iddle_timeout" env-required:"true"`
+	Host        string        `yaml:"host" env-default:"localhost"`
+	Port        string        `yaml:"port" env-default:"8080"`
+	Timeout     time.Duration `yaml:"timeout" env-required:"true"`
+	IdleTimeout time.Duration `yaml:"idle_timeout" env-required:"true"`
 }
 
 func MustLoad() *Config {
-	configPath := os.Getenv("CONFIG_PATH")
-	if configPath == "" {
-		log.Fatal("CONFIG_PATH is not defined")
-	}
-
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
+	}
+
+	configPath := os.Getenv("CONFIG_PATH")
+	if configPath == "" {
+		log.Fatal("CONFIG_PATH is not defined")
 	}
 
 	var cfg Config

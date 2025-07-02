@@ -1,10 +1,22 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"log/slog"
+	"net/http"
 	"os"
+	"time"
 	"url-shortener/internal/config"
+	"url-shortener/internal/database"
+	"url-shortener/internal/database/repo"
+	http_server "url-shortener/internal/http"
+	"url-shortener/internal/http/handler"
+	"url-shortener/internal/lib/logger/sl"
+	"url-shortener/internal/service/auth"
+	"url-shortener/internal/service/user"
+
+	"github.com/gin-gonic/gin"
 )
 
 const (
@@ -14,12 +26,52 @@ const (
 )
 
 func main() {
-	config := config.MustLoad()
-	log.Printf("config loaded: %v\n", config)
+	cfg := config.MustLoad()
+	log.Printf("config loaded: %v\n", cfg)
 
-	log := setupLogger(config.Env)
-	log.Info("starting url-shortener", slog.String("env", config.Env))
+	log := setupLogger(cfg.Env)
+	log.Info("starting url-shortener", slog.String("env", cfg.Env))
 	log.Debug("debug messages are enabled")
+
+	db, err := database.New(&cfg.Postgres)
+	if err != nil {
+		log.Error("failed to init database: %s", sl.Err(err))
+		return
+	}
+	log.Info("database initialized")
+
+	// services
+	userRepo := repo.NewUserRepo(db)
+	userService := user.New(userRepo, log)
+	jwtService := auth.NewJWTService("secret", time.Hour)
+	authService := auth.New(userService, jwtService, log)
+
+	// init http server
+	router := http_server.NewRouter(log, &handler.Dependencies{AuthService: authService})
+
+	server := NewServer(&cfg.HTTPServer, router)
+
+	log.Info(fmt.Sprintf("Starting server at %s:%s", cfg.HTTPServer.Host, cfg.HTTPServer.Port))
+	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		log.Error("server failed: %v", sl.Err(err))
+	}
+}
+
+func NewServer(cfg *config.HTTPServer, handler http.Handler) *http.Server {
+	return &http.Server{
+		Addr:         fmt.Sprintf("%s:%s", cfg.Host, cfg.Port),
+		Handler:      handler,
+		ReadTimeout:  cfg.Timeout,
+		WriteTimeout: cfg.Timeout,
+		IdleTimeout:  cfg.IdleTimeout,
+	}
+}
+
+func NewRouter() *gin.Engine {
+	router := gin.New()
+	router.Use(gin.Logger(), gin.Recovery())
+
+	return router
 }
 
 func setupLogger(env string) *slog.Logger {
