@@ -12,9 +12,7 @@ import (
 func LoadTestEnv(t *testing.T) {
 	root := projectRoot()
 	fmt.Println("root", root)
-	if err := godotenv.Load(filepath.Join(root, ".env.test")); err != nil {
-		t.Fatal("failed to load test env")
-	}
+	_ = godotenv.Load(filepath.Join(root, ".env.test"))
 }
 
 func projectRoot() string {
