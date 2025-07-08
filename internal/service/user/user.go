@@ -56,7 +56,6 @@ GenerateID:
 	if err != nil {
 		log.Error("failed to create user", sl.Err(err))
 		if pgErr := pg.ParsePGError(err); pgErr != nil && pgErr.Code == "23505" { // // 23505 = unique_violation
-			fmt.Println("pgErr.ConstraintName", pgErr.ConstraintName)
 			switch pgErr.ConstraintName {
 			case "users_pkey":
 				goto GenerateID

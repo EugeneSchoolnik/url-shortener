@@ -15,10 +15,14 @@ var (
 	// user
 	ErrUserNotFound = errors.New("user not found")
 	ErrEmailTaken   = errors.New("email's already taken")
+	// url
+	ErrAliasTaken  = errors.New("this alias is already taken")
+	ErrUrlNotFound = errors.New("url not found")
 	// common
-	ErrInternalError = errors.New("internal server error")
-	ErrValidation    = errors.New("")
-	ErrNotFound      = errors.New("not found")
+	ErrInternalError           = errors.New("internal server error")
+	ErrValidation              = errors.New("")
+	ErrNotFound                = errors.New("not found")
+	ErrRelatedResourceNotFound = errors.New("invalid entity")
 )
 
 func PrettyValidationError(validationErrs validator.ValidationErrors) error {

@@ -1,14 +1,10 @@
 package auth
 
 import (
-	"errors"
 	"time"
+	"url-shortener/internal/service"
 
 	"github.com/golang-jwt/jwt/v5"
-)
-
-var (
-	ErrInvalidToken = errors.New("invalid token")
 )
 
 type JWTService struct {
@@ -50,12 +46,12 @@ func (s *JWTService) Parse(tokenStr string) (string, error) {
 	})
 
 	if err != nil || !token.Valid {
-		return "", ErrInvalidToken
+		return "", service.ErrInvalidToken
 	}
 
 	claims, ok := token.Claims.(*CustomClaims)
 	if !ok {
-		return "", ErrInvalidToken
+		return "", service.ErrInvalidToken
 	}
 
 	return claims.UserID, nil
