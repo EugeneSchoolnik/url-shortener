@@ -71,6 +71,11 @@ func TestUserRepo(t *testing.T) {
 		err = repo.Create(&model.Url{ID: "alias", Link: "https://google.com", UserID: user.ID})
 		assert.Equal(t, "23505", pg.ParsePGError(err).Code)
 
+		// Create with a user ID that does not exist
+		err = repo.Create(&model.Url{ID: "new-alias", Link: "https://google.com", UserID: "notfound"})
+		assert.Equal(t, "23503", pg.ParsePGError(err).Code) // 23503 = foreign_key_violation
+		assert.Equal(t, "fk_users_urls", pg.ParsePGError(err).ConstraintName)
+
 		// ByID
 		_, err = repo.ByID("notfound")
 		assert.ErrorIs(t, gorm.ErrRecordNotFound, err)
