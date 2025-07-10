@@ -1,8 +1,8 @@
 package service
 
 import (
-	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/go-playground/validator/v10"
@@ -10,19 +10,18 @@ import (
 
 var (
 	// auth
-	ErrInvalidToken       = errors.New("invalid token")
-	ErrInvalidCredentials = errors.New("invalid credentials")
+	ErrInvalidToken       = NewError(http.StatusUnauthorized, "invalid token")
+	ErrInvalidCredentials = NewError(http.StatusBadRequest, "invalid credentials")
 	// user
-	ErrUserNotFound = errors.New("user not found")
-	ErrEmailTaken   = errors.New("email's already taken")
+	ErrUserNotFound = NewError(http.StatusNotFound, "user not found")
+	ErrEmailTaken   = NewError(http.StatusConflict, "email's already taken")
 	// url
-	ErrAliasTaken  = errors.New("this alias is already taken")
-	ErrUrlNotFound = errors.New("url not found")
+	ErrUrlNotFound = NewError(http.StatusNotFound, "url not found")
+	ErrAliasTaken  = NewError(http.StatusConflict, "this alias is already taken")
 	// common
-	ErrInternalError           = errors.New("internal server error")
-	ErrValidation              = errors.New("")
-	ErrNotFound                = errors.New("not found")
-	ErrRelatedResourceNotFound = errors.New("invalid entity")
+	ErrInternalError           = NewError(http.StatusInternalServerError, "internal server error")
+	ErrValidation              = NewError(http.StatusBadRequest, "")
+	ErrRelatedResourceNotFound = NewError(http.StatusUnprocessableEntity, "invalid entity")
 )
 
 func PrettyValidationError(validationErrs validator.ValidationErrors) error {

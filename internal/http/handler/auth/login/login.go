@@ -1,14 +1,12 @@
 package login
 
 import (
-	"errors"
 	"log/slog"
 	"net/http"
 	"url-shortener/internal/http/api"
 	"url-shortener/internal/lib/logger/sl"
 	"url-shortener/internal/model"
 	"url-shortener/internal/model/dto"
-	"url-shortener/internal/service"
 
 	"github.com/gin-gonic/gin"
 )
@@ -41,16 +39,7 @@ func New(log *slog.Logger, userAuthenticator UserAuthenticator) gin.HandlerFunc 
 		user, token, err := userAuthenticator.Login(req.Email, req.Password)
 		if err != nil {
 			// no need for logs
-			var code int
-			switch {
-			case errors.Is(err, service.ErrValidation) || errors.Is(err, service.ErrInvalidCredentials):
-				code = http.StatusBadRequest
-			case errors.Is(err, service.ErrNotFound):
-				code = http.StatusNotFound
-			default:
-				code = http.StatusInternalServerError
-			}
-			c.JSON(code, api.ErrResponse(err.Error()))
+			c.JSON(api.ErrReponseFromServiceError(err))
 			return
 		}
 

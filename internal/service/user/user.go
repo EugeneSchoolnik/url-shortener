@@ -108,7 +108,7 @@ func (s *UserService) ByEmail(email string, withContext ...bool) (*model.User, e
 	if err != nil {
 		log.Error("failed to get user by email", sl.Err(err))
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, service.ErrNotFound
+			return nil, service.ErrUserNotFound
 		}
 		return nil, service.ErrInternalError
 	}
@@ -137,7 +137,7 @@ func (s *UserService) ById(id string, withContext ...bool) (*model.User, error) 
 	if err != nil {
 		log.Error("failed to get user by id", sl.Err(err))
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, service.ErrNotFound
+			return nil, service.ErrUserNotFound
 		}
 		return nil, service.ErrInternalError
 	}

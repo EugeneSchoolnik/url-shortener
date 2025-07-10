@@ -1,14 +1,12 @@
 package by_user
 
 import (
-	"errors"
 	"log/slog"
 	"net/http"
 	"strconv"
 	"url-shortener/internal/http/api"
 	"url-shortener/internal/model"
 	"url-shortener/internal/model/dto"
-	"url-shortener/internal/service"
 
 	"github.com/gin-gonic/gin"
 )
@@ -43,14 +41,7 @@ func New(log *slog.Logger, urlGetter UrlsGetter) gin.HandlerFunc {
 		urls, err := urlGetter.ByUserID(userID.(string), limit, offset)
 		if err != nil {
 			// no need for logs
-			var code int
-			switch {
-			case errors.Is(err, service.ErrValidation):
-				code = http.StatusBadRequest
-			default:
-				code = http.StatusInternalServerError
-			}
-			c.JSON(code, api.ErrResponse(err.Error()))
+			c.JSON(api.ErrReponseFromServiceError(err))
 			return
 		}
 

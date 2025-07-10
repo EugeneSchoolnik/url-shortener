@@ -1,11 +1,9 @@
 package remove
 
 import (
-	"errors"
 	"log/slog"
 	"net/http"
 	"url-shortener/internal/http/api"
-	"url-shortener/internal/service"
 
 	"github.com/gin-gonic/gin"
 )
@@ -28,14 +26,7 @@ func New(log *slog.Logger, urlDeleter UrlDeleter) gin.HandlerFunc {
 		err := urlDeleter.Delete(id, userID.(string))
 		if err != nil {
 			// no need for logs
-			var code int
-			switch {
-			case errors.Is(err, service.ErrValidation):
-				code = http.StatusBadRequest
-			default:
-				code = http.StatusInternalServerError
-			}
-			c.JSON(code, api.ErrResponse(err.Error()))
+			c.JSON(api.ErrReponseFromServiceError(err))
 			return
 		}
 

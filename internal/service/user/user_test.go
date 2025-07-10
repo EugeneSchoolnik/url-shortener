@@ -172,7 +172,7 @@ func TestUserService_ByEmail(t *testing.T) {
 			mockSetup: func(r *mocks.UserRepo) {
 				r.On("ByEmail", mock.IsType("")).Return(nil, gorm.ErrRecordNotFound)
 			},
-			wantErr: service.ErrNotFound,
+			wantErr: service.ErrUserNotFound,
 		},
 		{
 			name:  "unxpected error",
@@ -231,7 +231,7 @@ func TestUserService_ById(t *testing.T) {
 			mockSetup: func(r *mocks.UserRepo) {
 				r.On("ById", mock.IsType("")).Return(nil, gorm.ErrRecordNotFound)
 			},
-			wantErr: service.ErrNotFound,
+			wantErr: service.ErrUserNotFound,
 		},
 		{
 			name: "unxpected error",
