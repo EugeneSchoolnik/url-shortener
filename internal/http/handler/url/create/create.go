@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
+	"url-shortener/internal/http/api"
 	"url-shortener/internal/lib/logger/sl"
 	"url-shortener/internal/model"
 	"url-shortener/internal/model/dto"
@@ -14,9 +15,6 @@ import (
 
 type Request = dto.CreateUrl
 type SuccessResponse = *dto.PublicUrl
-type ErrorResponse struct {
-	Error string `json:"error"`
-}
 
 type UrlCreator interface {
 	Create(urlDto *dto.CreateUrl, userID string) (*model.Url, error)
@@ -29,13 +27,13 @@ func New(log *slog.Logger, urlCreator UrlCreator) gin.HandlerFunc {
 		var req Request
 		if err := c.ShouldBind(&req); err != nil {
 			log.Info("invalid input", sl.Err(err))
-			c.JSON(http.StatusBadRequest, ErrorResponse{Error: "invalid input"})
+			c.JSON(http.StatusBadRequest, api.ErrResponse("invalid input"))
 			return
 		}
 
 		userID, ok := c.Get("user_id")
 		if !ok {
-			c.JSON(http.StatusUnauthorized, ErrorResponse{Error: "authorization error"})
+			c.JSON(http.StatusUnauthorized, api.ErrResponse("authorization error"))
 			return
 		}
 
@@ -53,7 +51,7 @@ func New(log *slog.Logger, urlCreator UrlCreator) gin.HandlerFunc {
 			default:
 				code = http.StatusInternalServerError
 			}
-			c.JSON(code, ErrorResponse{Error: err.Error()})
+			c.JSON(code, api.ErrResponse(err.Error()))
 			return
 		}
 

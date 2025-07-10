@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 	"url-shortener/internal/database/repo"
+	"url-shortener/internal/http/api"
 	"url-shortener/internal/http/handler"
 	by_user "url-shortener/internal/http/handler/url/by-user"
 	"url-shortener/internal/http/route"
@@ -51,7 +52,6 @@ func TestByUserHandler(t *testing.T) {
 	route.Url(r, r, log, &handler.Dependencies{UrlService: urlService, JwtService: jwtService})
 
 	type successType = by_user.SuccessResponse
-	type errorType = by_user.ErrorResponse
 	type query struct {
 		limit  any
 		offset any
@@ -112,7 +112,7 @@ func TestByUserHandler(t *testing.T) {
 				assert.Equal(t, tt.query.limit, len(body))
 			} else {
 				// error
-				var body errorType
+				var body api.ErrorResponse
 				if err := json.Unmarshal(res.Body.Bytes(), &body); err != nil {
 					t.Error("response body is not error type")
 					return

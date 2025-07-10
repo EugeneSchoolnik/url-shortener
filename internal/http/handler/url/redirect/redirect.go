@@ -4,15 +4,12 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
+	"url-shortener/internal/http/api"
 	"url-shortener/internal/model"
 	"url-shortener/internal/service"
 
 	"github.com/gin-gonic/gin"
 )
-
-type ErrorResponse struct {
-	Error string `json:"error"`
-}
 
 type UrlGetter interface {
 	ByID(id string) (*model.Url, error)
@@ -24,7 +21,7 @@ func New(log *slog.Logger, urlGetter UrlGetter) gin.HandlerFunc {
 
 		alias := c.Param("alias")
 		if alias == "" {
-			c.JSON(http.StatusBadRequest, ErrorResponse{Error: "invalid alias"})
+			c.JSON(http.StatusBadRequest, api.ErrResponse("invalid alias"))
 			return
 		}
 
@@ -40,7 +37,7 @@ func New(log *slog.Logger, urlGetter UrlGetter) gin.HandlerFunc {
 			default:
 				code = http.StatusInternalServerError
 			}
-			c.JSON(code, ErrorResponse{Error: err.Error()})
+			c.JSON(code, api.ErrResponse(err.Error()))
 			return
 		}
 

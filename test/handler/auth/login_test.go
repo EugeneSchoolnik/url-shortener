@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 	"url-shortener/internal/database/repo"
+	"url-shortener/internal/http/api"
 	"url-shortener/internal/http/handler"
 	"url-shortener/internal/http/handler/auth/login"
 	"url-shortener/internal/http/route"
@@ -42,7 +43,6 @@ func TestLoginHandler(t *testing.T) {
 	require.NoError(t, err)
 
 	type successType = login.SuccessResponse
-	type errorType = login.ErrorResponse
 
 	tests := []struct {
 		name      string
@@ -100,7 +100,7 @@ func TestLoginHandler(t *testing.T) {
 				}
 			} else {
 				// error
-				var body errorType
+				var body api.ErrorResponse
 				if err := json.Unmarshal(res.Body.Bytes(), &body); err != nil {
 					t.Error("response body is not error type")
 					return

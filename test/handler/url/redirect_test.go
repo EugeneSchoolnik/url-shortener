@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 	"url-shortener/internal/database/repo"
+	"url-shortener/internal/http/api"
 	"url-shortener/internal/http/handler"
-	"url-shortener/internal/http/handler/url/remove"
 	"url-shortener/internal/http/route"
 	"url-shortener/internal/model/dto"
 	"url-shortener/internal/service/auth"
@@ -47,8 +47,6 @@ func TestRedirectHandler(t *testing.T) {
 	r := gin.New()
 	route.Url(r, r, log, &handler.Dependencies{UrlService: urlService, JwtService: jwtService})
 
-	type errorType = remove.ErrorResponse
-
 	tests := []struct {
 		name         string
 		alias        string
@@ -81,7 +79,7 @@ func TestRedirectHandler(t *testing.T) {
 
 			if tt.wantError != "" {
 				// error
-				var body errorType
+				var body api.ErrorResponse
 				if err := json.Unmarshal(res.Body.Bytes(), &body); err != nil {
 					t.Error("response body is not error type")
 					return

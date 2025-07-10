@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
+	"url-shortener/internal/http/api"
 	"url-shortener/internal/lib/logger/sl"
 	"url-shortener/internal/model"
 	"url-shortener/internal/model/dto"
@@ -19,9 +20,6 @@ type SuccessResponse struct {
 	User  *dto.PublicUser `json:"user"`
 	Token string          `json:"token"`
 }
-type ErrorResponse struct {
-	Error string `json:"error"`
-}
 
 type UserRegistrar interface {
 	Register(userDto *dto.CreateUser) (*model.User, string, error)
@@ -35,7 +33,7 @@ func New(log *slog.Logger, userRegisterer UserRegistrar) gin.HandlerFunc {
 		var req Request
 		if err := c.ShouldBind(&req); err != nil {
 			log.Info("invalid input", sl.Err(err))
-			c.JSON(http.StatusBadRequest, ErrorResponse{Error: "invalid input"})
+			c.JSON(http.StatusBadRequest, api.ErrResponse("invalid input"))
 			return
 		}
 
@@ -51,7 +49,7 @@ func New(log *slog.Logger, userRegisterer UserRegistrar) gin.HandlerFunc {
 			default:
 				code = http.StatusInternalServerError
 			}
-			c.JSON(code, ErrorResponse{Error: err.Error()})
+			c.JSON(code, api.ErrResponse(err.Error()))
 			return
 		}
 

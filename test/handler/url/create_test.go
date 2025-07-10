@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 	"url-shortener/internal/database/repo"
+	"url-shortener/internal/http/api"
 	"url-shortener/internal/http/handler"
 	"url-shortener/internal/http/handler/url/create"
 	"url-shortener/internal/http/route"
@@ -48,7 +49,6 @@ func TestCreateHandler(t *testing.T) {
 	route.Url(r, r, log, &handler.Dependencies{UrlService: urlService, JwtService: jwtService})
 
 	type successType = create.SuccessResponse
-	type errorType = create.ErrorResponse
 
 	tests := []struct {
 		name       string
@@ -132,7 +132,7 @@ func TestCreateHandler(t *testing.T) {
 				}
 			} else {
 				// error
-				var body errorType
+				var body api.ErrorResponse
 				if err := json.Unmarshal(res.Body.Bytes(), &body); err != nil {
 					t.Error("response body is not error type")
 					return

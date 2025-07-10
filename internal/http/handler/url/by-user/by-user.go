@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"strconv"
+	"url-shortener/internal/http/api"
 	"url-shortener/internal/model"
 	"url-shortener/internal/model/dto"
 	"url-shortener/internal/service"
@@ -13,9 +14,6 @@ import (
 )
 
 type SuccessResponse = []*dto.PublicUrl
-type ErrorResponse struct {
-	Error string `json:"error"`
-}
 
 type UrlsGetter interface {
 	ByUserID(id string, limit int, offset int) ([]model.Url, error)
@@ -27,18 +25,18 @@ func New(log *slog.Logger, urlGetter UrlsGetter) gin.HandlerFunc {
 
 		limit, err := strconv.Atoi(c.DefaultQuery("limit", "16"))
 		if err != nil {
-			c.JSON(http.StatusBadRequest, ErrorResponse{Error: "query parameter `limit` is invalid"})
+			c.JSON(http.StatusBadRequest, api.ErrResponse("query parameter `limit` is invalid"))
 			return
 		}
 		offset, err := strconv.Atoi(c.DefaultQuery("offset", "0"))
 		if err != nil {
-			c.JSON(http.StatusBadRequest, ErrorResponse{Error: "query parameter `offset` is invalid"})
+			c.JSON(http.StatusBadRequest, api.ErrResponse("query parameter `offset` is invalid"))
 			return
 		}
 
 		userID, ok := c.Get("user_id")
 		if !ok {
-			c.JSON(http.StatusUnauthorized, ErrorResponse{Error: "authorization error"})
+			c.JSON(http.StatusUnauthorized, api.ErrResponse("authorization error"))
 			return
 		}
 
@@ -52,7 +50,7 @@ func New(log *slog.Logger, urlGetter UrlsGetter) gin.HandlerFunc {
 			default:
 				code = http.StatusInternalServerError
 			}
-			c.JSON(code, ErrorResponse{Error: err.Error()})
+			c.JSON(code, api.ErrResponse(err.Error()))
 			return
 		}
 

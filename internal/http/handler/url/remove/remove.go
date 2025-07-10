@@ -4,14 +4,11 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
+	"url-shortener/internal/http/api"
 	"url-shortener/internal/service"
 
 	"github.com/gin-gonic/gin"
 )
-
-type ErrorResponse struct {
-	Error string `json:"error"`
-}
 
 type UrlDeleter interface {
 	Delete(id, userID string) error
@@ -24,7 +21,7 @@ func New(log *slog.Logger, urlDeleter UrlDeleter) gin.HandlerFunc {
 		id := c.Param("id")
 		userID, ok := c.Get("user_id")
 		if !ok {
-			c.JSON(http.StatusUnauthorized, ErrorResponse{Error: "authorization error"})
+			c.JSON(http.StatusUnauthorized, api.ErrResponse("authorization error"))
 			return
 		}
 
@@ -38,7 +35,7 @@ func New(log *slog.Logger, urlDeleter UrlDeleter) gin.HandlerFunc {
 			default:
 				code = http.StatusInternalServerError
 			}
-			c.JSON(code, ErrorResponse{Error: err.Error()})
+			c.JSON(code, api.ErrResponse(err.Error()))
 			return
 		}
 
