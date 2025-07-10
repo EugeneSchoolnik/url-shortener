@@ -11,7 +11,7 @@ type UpdateUser struct {
 	Email string `validate:"omitempty,email"`
 }
 
-type UserPublic struct {
+type PublicUser struct {
 	ID    string `json:"id"`
 	Email string `json:"email"`
 }
@@ -24,6 +24,6 @@ func (dto *UpdateUser) Model() *model.User {
 	return &model.User{Email: dto.Email}
 }
 
-func ToUserPublic(u *model.User) *UserPublic {
-	return &UserPublic{ID: u.ID, Email: u.Email}
+func ToPublicUser(u *model.User) *PublicUser {
+	return &PublicUser{ID: u.ID, Email: u.Email}
 }

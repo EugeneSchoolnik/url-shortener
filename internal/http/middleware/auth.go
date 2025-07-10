@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -15,8 +16,9 @@ type ErrorResponse struct {
 	Error string `json:"error"`
 }
 
-func AuthMiddleware(jwtParser JWTParser) gin.HandlerFunc {
+func Auth(jwtParser JWTParser) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		fmt.Println("----------------------- auth1 -----------------------")
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, ErrorResponse{Error: "invalid authorization"})

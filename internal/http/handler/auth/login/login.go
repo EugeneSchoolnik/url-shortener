@@ -17,7 +17,7 @@ type Request struct {
 	Password string `json:"password" binding:"required"`
 }
 type SuccessResponse struct {
-	User  *dto.UserPublic `json:"user"`
+	User  *dto.PublicUser `json:"user"`
 	Token string          `json:"token"`
 }
 type ErrorResponse struct {
@@ -56,6 +56,6 @@ func New(log *slog.Logger, userAuthenticator UserAuthenticator) gin.HandlerFunc 
 			return
 		}
 
-		c.JSON(http.StatusOK, SuccessResponse{User: dto.ToUserPublic(user), Token: token})
+		c.JSON(http.StatusOK, SuccessResponse{User: dto.ToPublicUser(user), Token: token})
 	}
 }

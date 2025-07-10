@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestAuthMiddleware(t *testing.T) {
+func TestAuth(t *testing.T) {
 	tests := []struct {
 		name   string
 		header func(jwt *auth.JWTService) string
@@ -56,7 +56,7 @@ func TestAuthMiddleware(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			jwtService := auth.NewJWTService("secret", time.Hour)
 			router := gin.New()
-			router.Use(middleware.AuthMiddleware(jwtService))
+			router.Use(middleware.Auth(jwtService))
 
 			router.GET("/protected", func(c *gin.Context) {
 				userID, _ := c.Get("user_id")
