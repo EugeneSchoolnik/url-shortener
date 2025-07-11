@@ -53,13 +53,15 @@ func (r *UserRepo) ByEmail(email string) (*model.User, error) {
 func (r *UserRepo) ContextById(id string) (*model.User, error) {
 	var user model.User
 
-	// TODO: add preloads when there will be other models
-	return &user, r.db.Where("id = ?", id).First(&user).Error
+	return &user, r.db.Preload("Urls", func(db *gorm.DB) *gorm.DB {
+		return db.Limit(16)
+	}).Where("id = ?", id).First(&user).Error
 }
 
 func (r *UserRepo) ContextByEmail(email string) (*model.User, error) {
 	var user model.User
 
-	// TODO: add preloads when there will be other models
-	return &user, r.db.Where("email = ?", email).First(&user).Error
+	return &user, r.db.Preload("Urls", func(db *gorm.DB) *gorm.DB {
+		return db.Limit(16)
+	}).Where("email = ?", email).First(&user).Error
 }

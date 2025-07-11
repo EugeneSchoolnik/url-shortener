@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"net/http"
 	"url-shortener/internal/service"
 )
@@ -15,7 +16,8 @@ func ErrResponse(err string) ErrorResponse {
 
 func ErrReponseFromServiceError(err error) (int, any) {
 	statusCode := http.StatusInternalServerError
-	if sErr, ok := err.(*service.Error); ok {
+	var sErr *service.Error
+	if errors.As(err, &sErr); sErr != nil {
 		statusCode = sErr.StatusCode()
 	}
 

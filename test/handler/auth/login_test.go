@@ -77,7 +77,7 @@ func TestLoginHandler(t *testing.T) {
 			name:      "user not found",
 			body:      `{"email":"asdfasdf@gmail.com","password":"12345678"}`,
 			wantCode:  http.StatusNotFound,
-			wantError: "not found",
+			wantError: "user not found",
 		},
 	}
 

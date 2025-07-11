@@ -1,4 +1,4 @@
-package repo
+package repo_test
 
 import (
 	"strconv"
@@ -13,7 +13,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func TestUserRepo(t *testing.T) {
+func TestUrlRepo(t *testing.T) {
 	db := testdb.New(t)
 
 	testdb.TruncateTables(t, "users", "urls")
