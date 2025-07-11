@@ -11,9 +11,10 @@ type UpdateUser struct {
 	Email string `validate:"omitempty,email"`
 }
 
-type UserPublic struct {
-	ID    string `json:"id"`
-	Email string `json:"email"`
+type PublicUser struct {
+	ID    string       `json:"id"`
+	Email string       `json:"email"`
+	Urls  []*PublicUrl `json:"urls"`
 }
 
 func (dto *CreateUser) Model() *model.User {
@@ -24,6 +25,10 @@ func (dto *UpdateUser) Model() *model.User {
 	return &model.User{Email: dto.Email}
 }
 
-func ToUserPublic(u *model.User) *UserPublic {
-	return &UserPublic{ID: u.ID, Email: u.Email}
+func ToPublicUser(u *model.User) *PublicUser {
+	urls := make([]*PublicUrl, len(u.Urls))
+	for i := range urls {
+		urls[i] = ToPublicUrl(&u.Urls[i])
+	}
+	return &PublicUser{ID: u.ID, Email: u.Email, Urls: urls}
 }

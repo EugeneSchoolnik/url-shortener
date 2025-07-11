@@ -17,6 +17,7 @@ func NewRouter(log *slog.Logger, deps *handler.Dependencies) *gin.Engine {
 
 	// routes
 	route.Auth(v1, log, deps)
+	route.Url(r, v1, log, deps)
 
 	return r
 }

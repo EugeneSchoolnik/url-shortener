@@ -56,7 +56,6 @@ GenerateID:
 	if err != nil {
 		log.Error("failed to create user", sl.Err(err))
 		if pgErr := pg.ParsePGError(err); pgErr != nil && pgErr.Code == "23505" { // // 23505 = unique_violation
-			fmt.Println("pgErr.ConstraintName", pgErr.ConstraintName)
 			switch pgErr.ConstraintName {
 			case "users_pkey":
 				goto GenerateID
@@ -109,7 +108,7 @@ func (s *UserService) ByEmail(email string, withContext ...bool) (*model.User, e
 	if err != nil {
 		log.Error("failed to get user by email", sl.Err(err))
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, service.ErrNotFound
+			return nil, service.ErrUserNotFound
 		}
 		return nil, service.ErrInternalError
 	}
@@ -138,7 +137,7 @@ func (s *UserService) ById(id string, withContext ...bool) (*model.User, error) 
 	if err != nil {
 		log.Error("failed to get user by id", sl.Err(err))
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, service.ErrNotFound
+			return nil, service.ErrUserNotFound
 		}
 		return nil, service.ErrInternalError
 	}

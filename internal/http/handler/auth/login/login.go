@@ -1,13 +1,12 @@
 package login
 
 import (
-	"errors"
 	"log/slog"
 	"net/http"
+	"url-shortener/internal/http/api"
 	"url-shortener/internal/lib/logger/sl"
 	"url-shortener/internal/model"
 	"url-shortener/internal/model/dto"
-	"url-shortener/internal/service"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,11 +16,8 @@ type Request struct {
 	Password string `json:"password" binding:"required"`
 }
 type SuccessResponse struct {
-	User  *dto.UserPublic `json:"user"`
+	User  *dto.PublicUser `json:"user"`
 	Token string          `json:"token"`
-}
-type ErrorResponse struct {
-	Error string `json:"error"`
 }
 
 type UserAuthenticator interface {
@@ -36,26 +32,17 @@ func New(log *slog.Logger, userAuthenticator UserAuthenticator) gin.HandlerFunc 
 		var req Request
 		if err := c.ShouldBind(&req); err != nil {
 			log.Info("invalid input", sl.Err(err))
-			c.JSON(http.StatusBadRequest, ErrorResponse{Error: "invalid input"})
+			c.JSON(http.StatusBadRequest, api.ErrResponse("invalid input"))
 			return
 		}
 
 		user, token, err := userAuthenticator.Login(req.Email, req.Password)
 		if err != nil {
 			// no need for logs
-			var code int
-			switch {
-			case errors.Is(err, service.ErrValidation) || errors.Is(err, service.ErrInvalidCredentials):
-				code = http.StatusBadRequest
-			case errors.Is(err, service.ErrNotFound):
-				code = http.StatusNotFound
-			default:
-				code = http.StatusInternalServerError
-			}
-			c.JSON(code, ErrorResponse{Error: err.Error()})
+			c.JSON(api.ErrReponseFromServiceError(err))
 			return
 		}
 
-		c.JSON(http.StatusOK, SuccessResponse{User: dto.ToUserPublic(user), Token: token})
+		c.JSON(http.StatusOK, SuccessResponse{User: dto.ToPublicUser(user), Token: token})
 	}
 }

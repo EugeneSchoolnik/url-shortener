@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 	"url-shortener/internal/database/repo"
+	"url-shortener/internal/http/api"
 	"url-shortener/internal/http/handler"
 	"url-shortener/internal/http/handler/auth/register"
 	"url-shortener/internal/http/route"
@@ -36,7 +37,6 @@ func TestRegisterHandler(t *testing.T) {
 	route.Auth(r, log, &handler.Dependencies{AuthService: authService})
 
 	type successType = register.SuccessResponse
-	type errorType = register.ErrorResponse
 
 	tests := []struct {
 		name      string
@@ -94,7 +94,7 @@ func TestRegisterHandler(t *testing.T) {
 				}
 			} else {
 				// error
-				var body errorType
+				var body api.ErrorResponse
 				if err := json.Unmarshal(res.Body.Bytes(), &body); err != nil {
 					t.Error("response body is not error type")
 					return
