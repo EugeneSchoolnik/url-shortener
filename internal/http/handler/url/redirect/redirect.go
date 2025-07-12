@@ -12,8 +12,11 @@ import (
 type UrlGetter interface {
 	ByID(id string) (*model.Url, error)
 }
+type ClickRecorder interface {
+	Record(urlID string) error
+}
 
-func New(log *slog.Logger, urlGetter UrlGetter) gin.HandlerFunc {
+func New(log *slog.Logger, urlGetter UrlGetter, clickRecorder ClickRecorder) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		log = log.With(slog.String("op", "handler.url.create"))
 
@@ -24,6 +27,12 @@ func New(log *slog.Logger, urlGetter UrlGetter) gin.HandlerFunc {
 		}
 
 		url, err := urlGetter.ByID(alias)
+		if err != nil {
+			// no need for logs
+			c.JSON(api.ErrReponseFromServiceError(err))
+			return
+		}
+		err = clickRecorder.Record(alias)
 		if err != nil {
 			// no need for logs
 			c.JSON(api.ErrReponseFromServiceError(err))

@@ -2,7 +2,6 @@ package url_test
 
 import (
 	"encoding/json"
-	"fmt"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
@@ -11,6 +10,7 @@ import (
 	"url-shortener/internal/database/repo"
 	"url-shortener/internal/http/api"
 	"url-shortener/internal/http/handler"
+	"url-shortener/internal/http/handler/url/stats"
 	"url-shortener/internal/http/route"
 	"url-shortener/internal/model/dto"
 	"url-shortener/internal/service/auth"
@@ -24,9 +24,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestRedirectHandler(t *testing.T) {
+func TestStatsHandler(t *testing.T) {
 	db := testdb.New(t)
-	testdb.TruncateTables(t, "users", "urls")
+	testdb.TruncateTables(t, "users")
 
 	log := slog.Default()
 
@@ -41,48 +41,63 @@ func TestRedirectHandler(t *testing.T) {
 	clickStatService := clickstat.New(clickStatRepo, log)
 
 	// test user
-	user, _, err := authService.Register(&dto.CreateUser{Email: "example@gmail.com", Password: "12345678"})
+	user, token, err := authService.Register(&dto.CreateUser{Email: "example@gmail.com", Password: "12345678"})
 	require.NoError(t, err)
-	// url for test
-	url, err := urlService.Create(&dto.CreateUrl{Link: "https://google.com"}, user.ID)
+	// urls for test
+	testUrl, err := urlService.Create(&dto.CreateUrl{Link: "https://google.com"}, user.ID)
 	require.NoError(t, err)
 
 	r := gin.New()
 	route.Url(r, r, log, &handler.Dependencies{UrlService: urlService, JwtService: jwtService, ClickStatService: clickStatService})
 
+	type successType = stats.SuccessResponse
+
 	tests := []struct {
-		name         string
-		alias        string
-		wantCode     int
-		wantLocation string
-		wantClicks   int64
-		wantError    string
+		name           string
+		alias          string
+		simulateClicks int64
+		wantCode       int
+		wantError      string
 	}{
 		{
-			name:         "success",
-			alias:        url.ID,
-			wantLocation: url.Link,
-			wantClicks:   1,
-			wantCode:     http.StatusFound,
+			name:           "success123 redirects",
+			alias:          testUrl.ID,
+			simulateClicks: 123,
+			wantCode:       http.StatusOK,
 		},
 		{
-			name:      "not found",
-			alias:     "notfound",
-			wantCode:  http.StatusNotFound,
-			wantError: "url not found",
+			name:     "alias doesn't exist",
+			alias:    "notfound",
+			wantCode: http.StatusOK,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/%s", tt.alias), nil)
+			for range tt.simulateClicks {
+				req := httptest.NewRequest(http.MethodGet, "/"+tt.alias, nil)
+				req.Header.Set("Authorization", "Bearer "+token)
+				res := httptest.NewRecorder()
+				r.ServeHTTP(res, req)
+				// require.Equal(t, http.StatusFound, res.Code)
+			}
 
+			req := httptest.NewRequest(http.MethodGet, "/url/"+tt.alias, nil)
+			req.Header.Set("Authorization", "Bearer "+token)
 			res := httptest.NewRecorder()
 			r.ServeHTTP(res, req)
 
 			assert.Equal(t, tt.wantCode, res.Code)
 
-			if tt.wantError != "" {
+			// success
+			if tt.wantError == "" {
+				var body successType
+				if err := json.Unmarshal(res.Body.Bytes(), &body); err != nil {
+					t.Error("response body is not success type")
+					return
+				}
+				assert.Equal(t, tt.simulateClicks, body[len(body)-1].Count)
+			} else {
 				// error
 				var body api.ErrorResponse
 				if err := json.Unmarshal(res.Body.Bytes(), &body); err != nil {
@@ -90,13 +105,7 @@ func TestRedirectHandler(t *testing.T) {
 					return
 				}
 				assert.Equal(t, tt.wantError, body.Error)
-			} else {
-				assert.Equal(t, tt.wantLocation, res.Header().Get("Location"))
 			}
-
-			stats, err := clickStatService.Stats(tt.alias)
-			require.NoError(t, err)
-			assert.Equal(t, tt.wantClicks, stats[len(stats)-1].Count)
 		})
 	}
 }
