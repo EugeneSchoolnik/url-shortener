@@ -19,6 +19,7 @@ import (
 type UrlRepo interface {
 	Create(url *model.Url) error
 	ByID(id string) (*model.Url, error)
+	LinkByID(id string) (string, error)
 	ByUserID(id string, limit int, offset int) ([]model.Url, error)
 	Delete(id string, userID string) error
 }
@@ -97,6 +98,26 @@ func (s *UrlService) ByID(id string) (*model.Url, error) {
 	}
 	log.Info("got url by id successfully")
 	return url, nil
+}
+
+func (s *UrlService) RedirectLinkByID(id string) (string, error) {
+	log := s.log.With(slog.String("op", "service.url.RedirectLinkByID"))
+
+	if id == "" {
+		log.Info("id is empty")
+		return "", fmt.Errorf("%w%s", service.ErrValidation, "id is a required")
+	}
+
+	link, err := s.repo.LinkByID(id)
+	if err != nil {
+		log.Error("failed to get url", sl.Err(err))
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return "", service.ErrUrlNotFound
+		}
+		return "", service.ErrInternalError
+	}
+	log.Info("got link by id successfully")
+	return link, nil
 }
 
 func (s *UrlService) ByUserID(id string, limit int, offset int) ([]model.Url, error) {

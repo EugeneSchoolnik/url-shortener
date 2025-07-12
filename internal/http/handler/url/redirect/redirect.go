@@ -4,19 +4,18 @@ import (
 	"log/slog"
 	"net/http"
 	"url-shortener/internal/http/api"
-	"url-shortener/internal/model"
 
 	"github.com/gin-gonic/gin"
 )
 
-type UrlGetter interface {
-	ByID(id string) (*model.Url, error)
+type LinkGetter interface {
+	RedirectLinkByID(id string) (string, error)
 }
 type ClickRecorder interface {
 	Record(urlID string) error
 }
 
-func New(log *slog.Logger, urlGetter UrlGetter, clickRecorder ClickRecorder) gin.HandlerFunc {
+func New(log *slog.Logger, linkGetter LinkGetter, clickRecorder ClickRecorder) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		log = log.With(slog.String("op", "handler.url.create"))
 
@@ -26,7 +25,7 @@ func New(log *slog.Logger, urlGetter UrlGetter, clickRecorder ClickRecorder) gin
 			return
 		}
 
-		url, err := urlGetter.ByID(alias)
+		link, err := linkGetter.RedirectLinkByID(alias)
 		if err != nil {
 			// no need for logs
 			c.JSON(api.ErrReponseFromServiceError(err))
@@ -39,6 +38,6 @@ func New(log *slog.Logger, urlGetter UrlGetter, clickRecorder ClickRecorder) gin
 			return
 		}
 
-		c.Redirect(http.StatusFound, url.Link)
+		c.Redirect(http.StatusFound, link)
 	}
 }

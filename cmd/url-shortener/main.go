@@ -14,6 +14,7 @@ import (
 	"url-shortener/internal/http/handler"
 	"url-shortener/internal/lib/logger/sl"
 	"url-shortener/internal/service/auth"
+	clickstat "url-shortener/internal/service/click-stat"
 	"url-shortener/internal/service/url"
 	"url-shortener/internal/service/user"
 
@@ -44,13 +45,15 @@ func main() {
 	// services
 	userRepo := repo.NewUserRepo(db)
 	urlRepo := repo.NewUrlRepo(db)
+	clickStatRepo := repo.NewClickStatRepo(db)
 	userService := user.New(userRepo, log)
 	jwtService := auth.NewJWTService("secret", time.Hour)
 	authService := auth.New(userService, jwtService, log)
 	urlService := url.New(urlRepo, log)
+	clickStatService := clickstat.New(clickStatRepo, log)
 
 	// init http server
-	router := http_server.NewRouter(log, &handler.Dependencies{JwtService: jwtService, AuthService: authService, UrlService: urlService})
+	router := http_server.NewRouter(log, &handler.Dependencies{JwtService: jwtService, AuthService: authService, UrlService: urlService, ClickStatService: clickStatService})
 
 	server := NewServer(&cfg.HTTPServer, router)
 

@@ -28,6 +28,24 @@ func (r *UrlRepo) ByID(id string) (*model.Url, error) {
 	return &url, r.db.Where("id = ?", id).First(&url).Error
 }
 
+// LinkByID also increment total hits
+func (r *UrlRepo) LinkByID(id string) (string, error) {
+	var link string
+
+	res := r.db.Raw(`
+	UPDATE urls
+	SET total_hits = total_hits + 1
+	WHERE id = ?
+	RETURNING link;
+`, id).Scan(&link)
+
+	if res.RowsAffected == 0 {
+		return "", gorm.ErrRecordNotFound
+	}
+
+	return link, res.Error
+}
+
 func (r *UrlRepo) ByUserID(id string, limit int, offset int) ([]model.Url, error) {
 	var urls []model.Url
 

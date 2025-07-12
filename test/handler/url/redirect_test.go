@@ -26,7 +26,7 @@ import (
 
 func TestRedirectHandler(t *testing.T) {
 	db := testdb.New(t)
-	testdb.TruncateTables(t, "users", "urls")
+	testdb.TruncateTables(t, "users")
 
 	log := slog.Default()
 
@@ -92,11 +92,15 @@ func TestRedirectHandler(t *testing.T) {
 				assert.Equal(t, tt.wantError, body.Error)
 			} else {
 				assert.Equal(t, tt.wantLocation, res.Header().Get("Location"))
-			}
 
-			stats, err := clickStatService.Stats(tt.alias)
-			require.NoError(t, err)
-			assert.Equal(t, tt.wantClicks, stats[len(stats)-1].Count)
+				url, err := urlService.ByID(tt.alias)
+				require.NoError(t, err)
+				assert.Equal(t, tt.wantClicks, url.TotalHits)
+
+				stats, err := clickStatService.Stats(tt.alias)
+				require.NoError(t, err)
+				assert.Equal(t, tt.wantClicks, stats[len(stats)-1].Count)
+			}
 		})
 	}
 }

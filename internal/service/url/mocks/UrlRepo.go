@@ -109,6 +109,34 @@ func (_m *UrlRepo) Delete(id string, userID string) error {
 	return r0
 }
 
+// LinkByID provides a mock function with given fields: id
+func (_m *UrlRepo) LinkByID(id string) (string, error) {
+	ret := _m.Called(id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for LinkByID")
+	}
+
+	var r0 string
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (string, error)); ok {
+		return rf(id)
+	}
+	if rf, ok := ret.Get(0).(func(string) string); ok {
+		r0 = rf(id)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // NewUrlRepo creates a new instance of UrlRepo. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewUrlRepo(t interface {
