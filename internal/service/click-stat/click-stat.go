@@ -12,7 +12,7 @@ import (
 //go:generate mockery --name=ClickStatRepo
 type ClickStatRepo interface {
 	Create(ClickStat *model.ClickStat) error
-	ByUrlID(id string) ([]repo.DailyCount, error)
+	ByUrlID(urlID string, userID string) ([]repo.DailyCount, error)
 }
 
 type ClickStatService struct {
@@ -39,13 +39,17 @@ func (s *ClickStatService) Record(urlID string) error {
 	return nil
 }
 
-func (s *ClickStatService) Stats(urlID string) ([]repo.DailyCount, error) {
+func (s *ClickStatService) Stats(urlID, userID string) ([]repo.DailyCount, error) {
 	log := s.log.With(slog.String("op", "service.clickstat.Stats"))
 
-	stats, err := s.repo.ByUrlID(urlID)
+	stats, err := s.repo.ByUrlID(urlID, userID)
 	if err != nil {
 		log.Error("failed to get stats", sl.Err(err))
 		return nil, service.ErrInternalError
+	}
+	if len(stats) == 0 {
+		log.Info("statistics not found")
+		return nil, service.ErrUrlStatsNotFound
 	}
 
 	log.Info("statistics successfully received")

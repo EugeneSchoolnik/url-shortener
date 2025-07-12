@@ -97,7 +97,7 @@ func TestRedirectHandler(t *testing.T) {
 				require.NoError(t, err)
 				assert.Equal(t, tt.wantClicks, url.TotalHits)
 
-				stats, err := clickStatService.Stats(tt.alias)
+				stats, err := clickStatService.Stats(tt.alias, user.ID)
 				require.NoError(t, err)
 				assert.Equal(t, tt.wantClicks, stats[len(stats)-1].Count)
 			}

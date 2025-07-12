@@ -40,7 +40,7 @@ func TestClickStatRepo(t *testing.T) {
 			require.NoError(t, err)
 		}
 
-		stats, err := repo.ByUrlID(url.ID)
+		stats, err := repo.ByUrlID(url.ID, user.ID)
 		assert.NoError(t, err)
 		today := time.Now().Truncate(24 * time.Hour).UTC()
 		assert.Equal(t, today, stats[len(stats)-1].Day)

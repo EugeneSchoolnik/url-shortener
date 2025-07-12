@@ -72,6 +72,7 @@ func TestClickStatService_Stats(t *testing.T) {
 	tests := []struct {
 		name      string
 		urlID     string
+		userID    string
 		mockSetup func(r *mocks.ClickStatRepo)
 		want      []repo.DailyCount
 		wantErr   error
@@ -80,7 +81,7 @@ func TestClickStatService_Stats(t *testing.T) {
 			name:  "success",
 			urlID: "1234",
 			mockSetup: func(r *mocks.ClickStatRepo) {
-				r.On("ByUrlID", mock.Anything).Return(stats, nil).Once()
+				r.On("ByUrlID", mock.Anything, mock.Anything).Return(stats, nil).Once()
 			},
 			want: stats,
 		},
@@ -88,7 +89,7 @@ func TestClickStatService_Stats(t *testing.T) {
 			name:  "unexpected",
 			urlID: "1234",
 			mockSetup: func(r *mocks.ClickStatRepo) {
-				r.On("ByUrlID", mock.Anything).Return(nil, errors.New("unexpected")).Once()
+				r.On("ByUrlID", mock.Anything, mock.Anything).Return(nil, errors.New("unexpected")).Once()
 			},
 			wantErr: service.ErrInternalError,
 		},
@@ -101,7 +102,7 @@ func TestClickStatService_Stats(t *testing.T) {
 			}
 			s := clickstat.New(repo, slog.Default())
 
-			got, err := s.Stats(tt.urlID)
+			got, err := s.Stats(tt.urlID, tt.userID)
 			assert.Equal(t, tt.wantErr, err)
 			assert.Equal(t, tt.want, got)
 		})

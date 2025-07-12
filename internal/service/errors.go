@@ -16,8 +16,9 @@ var (
 	ErrUserNotFound = NewError(http.StatusNotFound, "user not found")
 	ErrEmailTaken   = NewError(http.StatusConflict, "email's already taken")
 	// url
-	ErrUrlNotFound = NewError(http.StatusNotFound, "url not found")
-	ErrAliasTaken  = NewError(http.StatusConflict, "this alias is already taken")
+	ErrUrlNotFound      = NewError(http.StatusNotFound, "url not found")
+	ErrAliasTaken       = NewError(http.StatusConflict, "this alias is already taken")
+	ErrUrlStatsNotFound = NewError(http.StatusNotFound, "url statistics not found")
 	// common
 	ErrInternalError           = NewError(http.StatusInternalServerError, "internal server error")
 	ErrValidation              = NewError(http.StatusBadRequest, "")

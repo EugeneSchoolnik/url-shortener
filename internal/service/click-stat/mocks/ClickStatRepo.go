@@ -15,9 +15,9 @@ type ClickStatRepo struct {
 	mock.Mock
 }
 
-// ByUrlID provides a mock function with given fields: id
-func (_m *ClickStatRepo) ByUrlID(id string) ([]repo.DailyCount, error) {
-	ret := _m.Called(id)
+// ByUrlID provides a mock function with given fields: urlID, userID
+func (_m *ClickStatRepo) ByUrlID(urlID string, userID string) ([]repo.DailyCount, error) {
+	ret := _m.Called(urlID, userID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ByUrlID")
@@ -25,19 +25,19 @@ func (_m *ClickStatRepo) ByUrlID(id string) ([]repo.DailyCount, error) {
 
 	var r0 []repo.DailyCount
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string) ([]repo.DailyCount, error)); ok {
-		return rf(id)
+	if rf, ok := ret.Get(0).(func(string, string) ([]repo.DailyCount, error)); ok {
+		return rf(urlID, userID)
 	}
-	if rf, ok := ret.Get(0).(func(string) []repo.DailyCount); ok {
-		r0 = rf(id)
+	if rf, ok := ret.Get(0).(func(string, string) []repo.DailyCount); ok {
+		r0 = rf(urlID, userID)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]repo.DailyCount)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(id)
+	if rf, ok := ret.Get(1).(func(string, string) error); ok {
+		r1 = rf(urlID, userID)
 	} else {
 		r1 = ret.Error(1)
 	}

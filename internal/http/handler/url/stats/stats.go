@@ -12,7 +12,7 @@ import (
 type SuccessResponse = []repo.DailyCount
 
 type StatsGetter interface {
-	Stats(urlID string) ([]repo.DailyCount, error)
+	Stats(urlID string, userID string) ([]repo.DailyCount, error)
 }
 
 func New(log *slog.Logger, statsGetter StatsGetter) gin.HandlerFunc {
@@ -20,13 +20,13 @@ func New(log *slog.Logger, statsGetter StatsGetter) gin.HandlerFunc {
 		log = log.With(slog.String("op", "handler.url.stats"))
 
 		urlID := c.Param("id")
-		// userID, ok := c.Get("user_id")
-		// if !ok {
-		// 	c.JSON(http.StatusUnauthorized, api.ErrResponse("authorization error"))
-		// 	return
-		// }
+		userID, ok := c.Get("user_id")
+		if !ok {
+			c.JSON(http.StatusUnauthorized, api.ErrResponse("authorization error"))
+			return
+		}
 
-		stats, err := statsGetter.Stats(urlID)
+		stats, err := statsGetter.Stats(urlID, userID.(string))
 		if err != nil {
 			// no need for logs
 			c.JSON(api.ErrReponseFromServiceError(err))

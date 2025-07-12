@@ -66,9 +66,10 @@ func TestStatsHandler(t *testing.T) {
 			wantCode:       http.StatusOK,
 		},
 		{
-			name:     "alias doesn't exist",
-			alias:    "notfound",
-			wantCode: http.StatusOK,
+			name:      "alias doesn't exist",
+			alias:     "notfound",
+			wantCode:  http.StatusNotFound,
+			wantError: "url statistics not found",
 		},
 	}
 
@@ -96,6 +97,7 @@ func TestStatsHandler(t *testing.T) {
 					t.Error("response body is not success type")
 					return
 				}
+				t.Log("=================", body)
 				assert.Equal(t, tt.simulateClicks, body[len(body)-1].Count)
 			} else {
 				// error
