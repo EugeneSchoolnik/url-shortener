@@ -38,6 +38,11 @@ func TestUrlRepo(t *testing.T) {
 		assert.Equal(t, url.Link, found.Link)
 		assert.Equal(t, url.UserID, found.UserID)
 
+		// LinkByID
+		link, err := repo.LinkByID("alias")
+		assert.NoError(t, err)
+		assert.Equal(t, url.Link, link)
+
 		// Delete
 		err = repo.Delete("alias", "1234")
 		assert.NoError(t, err)
