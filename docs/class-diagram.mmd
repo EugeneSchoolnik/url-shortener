@@ -20,12 +20,23 @@ classDiagram
     +Delete(userId: string)
     +GetById(id: string) User
     +GetByEmail(email: string) User
+    +GetContextById(id: string) User
+    +GetContextByEmail(id: string) User
   }
   UserService ..> User
+  class AuthService {
+    <<interface>>
+    +Register(user: CreateUserDTO) User, ~token: string~
+    +Login(email, password: string) User, ~token: string~
+    -hashPassword(password: string) string
+    -comparePassword(password, hash: string)
+  }
+  AuthService ..> User
   class UrlService {
     <<interface>>
     +Create(url: string, urlId: string) Url
     +Delete(urlId: string)
+    +GetById(urlId: string) Url
   }
   UrlService ..> Url
   class UrlStatsService {

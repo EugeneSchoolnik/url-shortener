@@ -1,0 +1,336 @@
+basePath: /api/v1
+definitions:
+  api.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  create.Request:
+    properties:
+      alias:
+        maxLength: 16
+        type: string
+      link:
+        type: string
+    required:
+    - link
+    type: object
+  create.SuccessResponse:
+    properties:
+      alias:
+        type: string
+      link:
+        type: string
+      totalHits:
+        type: integer
+    type: object
+  dto.CreateUser:
+    properties:
+      email:
+        type: string
+      password:
+        maxLength: 72
+        minLength: 8
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  dto.PublicUrl:
+    properties:
+      alias:
+        type: string
+      link:
+        type: string
+      totalHits:
+        type: integer
+    type: object
+  dto.PublicUser:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      urls:
+        items:
+          $ref: '#/definitions/dto.PublicUrl'
+        type: array
+    type: object
+  login.Request:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  login.SuccessResponse:
+    properties:
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/dto.PublicUser'
+    type: object
+  me.SuccessResponse:
+    properties:
+      user:
+        $ref: '#/definitions/dto.PublicUser'
+    type: object
+  register.Request:
+    properties:
+      user:
+        $ref: '#/definitions/dto.CreateUser'
+    required:
+    - user
+    type: object
+  register.SuccessResponse:
+    properties:
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/dto.PublicUser'
+    type: object
+  repo.DailyCount:
+    properties:
+      count:
+        type: integer
+      day:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  title: Url Shortener API
+  version: "1.0"
+paths:
+  /{alias}:
+    get:
+      parameters:
+      - description: alias for long url
+        in: path
+        name: alias
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "302":
+          description: Found
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Redirect
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Login credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/login.Request'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/login.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Authorizes the user
+      tags:
+      - auth
+  /auth/me:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/me.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get user data by token
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Register credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/register.Request'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/register.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Registers the user
+      tags:
+      - auth
+  /url:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: limit
+        in: query
+        name: limit
+        type: integer
+      - description: offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.PublicUrl'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get user's short urls
+      tags:
+      - url
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: alias is optional
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/create.Request'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/create.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Create a short url
+      tags:
+      - url
+  /url/{id}:
+    delete:
+      parameters:
+      - description: short url id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Remove user's short url
+      tags:
+      - url
+    get:
+      parameters:
+      - description: short url id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/repo.DailyCount'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get user's url stats
+      tags:
+      - url
+securityDefinitions:
+  Bearer:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
