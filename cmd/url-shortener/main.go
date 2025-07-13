@@ -60,7 +60,7 @@ func main() {
 	urlRepo := repo.NewUrlRepo(db)
 	clickStatRepo := repo.NewClickStatRepo(db)
 	userService := user.New(userRepo, log)
-	jwtService := auth.NewJWTService("secret", time.Hour)
+	jwtService := auth.NewJWTService(cfg.JwtSecret, time.Hour)
 	authService := auth.New(userService, jwtService, log)
 	urlService := url.New(urlRepo, log)
 	clickStatService := clickstat.New(clickStatRepo, log)

@@ -60,6 +60,48 @@ const docTemplate = `{
                 }
             }
         },
+        "/auth/me": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Get user data by token",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/me.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/register": {
             "post": {
                 "consumes": [
@@ -433,6 +475,14 @@ const docTemplate = `{
                 "token": {
                     "type": "string"
                 },
+                "user": {
+                    "$ref": "#/definitions/dto.PublicUser"
+                }
+            }
+        },
+        "me.SuccessResponse": {
+            "type": "object",
+            "properties": {
                 "user": {
                     "$ref": "#/definitions/dto.PublicUser"
                 }
