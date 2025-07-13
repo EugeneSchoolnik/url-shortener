@@ -73,6 +73,11 @@ definitions:
       user:
         $ref: '#/definitions/dto.PublicUser'
     type: object
+  me.SuccessResponse:
+    properties:
+      user:
+        $ref: '#/definitions/dto.PublicUser'
+    type: object
   register.Request:
     properties:
       user:
@@ -145,6 +150,32 @@ paths:
           schema:
             $ref: '#/definitions/api.ErrorResponse'
       summary: Authorizes the user
+      tags:
+      - auth
+  /auth/me:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/me.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get user data by token
       tags:
       - auth
   /auth/register:

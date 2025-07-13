@@ -60,7 +60,7 @@ func main() {
 	urlRepo := repo.NewUrlRepo(db)
 	clickStatRepo := repo.NewClickStatRepo(db)
 	userService := user.New(userRepo, log)
-	jwtService := auth.NewJWTService("secret", time.Hour)
+	jwtService := auth.NewJWTService(cfg.JwtSecret, time.Hour)
 	authService := auth.New(userService, jwtService, log)
 	urlService := url.New(urlRepo, log)
 	clickStatService := clickstat.New(clickStatRepo, log)
@@ -73,7 +73,7 @@ func main() {
 	}
 
 	// init http server
-	router := http_server.NewRouter(log, &handler.Dependencies{JwtService: jwtService, AuthService: authService, UrlService: urlService, ClickStatService: clickStatService})
+	router := http_server.NewRouter(log, &handler.Dependencies{JwtService: jwtService, UserService: userService, AuthService: authService, UrlService: urlService, ClickStatService: clickStatService})
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	server := NewServer(&cfg.HTTPServer, router)
