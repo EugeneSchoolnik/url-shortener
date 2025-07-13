@@ -73,7 +73,7 @@ func main() {
 	}
 
 	// init http server
-	router := http_server.NewRouter(log, &handler.Dependencies{JwtService: jwtService, AuthService: authService, UrlService: urlService, ClickStatService: clickStatService})
+	router := http_server.NewRouter(log, &handler.Dependencies{JwtService: jwtService, UserService: userService, AuthService: authService, UrlService: urlService, ClickStatService: clickStatService})
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	server := NewServer(&cfg.HTTPServer, router)
