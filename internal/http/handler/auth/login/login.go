@@ -24,6 +24,15 @@ type UserAuthenticator interface {
 	Login(email, password string) (*model.User, string, error)
 }
 
+// @Summary Authorizes the user
+// @Tags auth
+// @Accept  json
+// @Produce  json
+// @Param request body Request true "Login credentials"
+// @Success 200  {object}  SuccessResponse
+// @Failure 400  {object}  api.ErrorResponse
+// @Failure 404  {object}  api.ErrorResponse
+// @Router /auth/login [post]
 func New(log *slog.Logger, userAuthenticator UserAuthenticator) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		const op = "handler.auth.login"

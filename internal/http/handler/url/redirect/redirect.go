@@ -15,6 +15,12 @@ type ClickRecorder interface {
 	Record(urlID string) error
 }
 
+// @Summary Redirect
+// @Produce  json
+// @Param alias path string true "alias for long url"
+// @Success 302
+// @Failure 404  {object}  api.ErrorResponse
+// @Router /{alias} [get]
 func New(log *slog.Logger, linkGetter LinkGetter, clickRecorder ClickRecorder) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		log = log.With(slog.String("op", "handler.url.create"))

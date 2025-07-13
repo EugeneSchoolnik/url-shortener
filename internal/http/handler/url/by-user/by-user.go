@@ -17,9 +17,20 @@ type UrlsGetter interface {
 	ByUserID(id string, limit int, offset int) ([]model.Url, error)
 }
 
+// @Summary Get user's short urls
+// @Tags url
+// @Accept  json
+// @Produce  json
+// @Param limit query int false "limit"
+// @Param offset query int false "offset"
+// @Success 200  {object}  SuccessResponse
+// @Failure 400  {object}  api.ErrorResponse
+// @Failure 401  {object}  api.ErrorResponse
+// @Router /url [get]
+// @Security Bearer
 func New(log *slog.Logger, urlGetter UrlsGetter) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		log = log.With(slog.String("op", "handler.url.create"))
+		log = log.With(slog.String("op", "handler.url.byUser"))
 
 		limit, err := strconv.Atoi(c.DefaultQuery("limit", "16"))
 		if err != nil {
