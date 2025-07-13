@@ -45,6 +45,24 @@ func (_m *ClickStatRepo) ByUrlID(urlID string, userID string) ([]repo.DailyCount
 	return r0, r1
 }
 
+// CleanupStaleRecords provides a mock function with no fields
+func (_m *ClickStatRepo) CleanupStaleRecords() error {
+	ret := _m.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for CleanupStaleRecords")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func() error); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // Create provides a mock function with given fields: ClickStat
 func (_m *ClickStatRepo) Create(ClickStat *model.ClickStat) error {
 	ret := _m.Called(ClickStat)

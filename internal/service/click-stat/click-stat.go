@@ -7,12 +7,15 @@ import (
 	"url-shortener/internal/lib/pg"
 	"url-shortener/internal/model"
 	"url-shortener/internal/service"
+
+	"github.com/robfig/cron/v3"
 )
 
 //go:generate mockery --name=ClickStatRepo
 type ClickStatRepo interface {
 	Create(ClickStat *model.ClickStat) error
 	ByUrlID(urlID string, userID string) ([]repo.DailyCount, error)
+	CleanupStaleRecords() error
 }
 
 type ClickStatService struct {
@@ -54,4 +57,19 @@ func (s *ClickStatService) Stats(urlID, userID string) ([]repo.DailyCount, error
 
 	log.Info("statistics successfully received")
 	return stats, nil
+}
+func (s *ClickStatService) CleanupStaleRecords() (*cron.Cron, error) {
+	c := cron.New()
+
+	// Run daily at 02:00 AM
+	_, err := c.AddFunc("0 2 * * *", func() {
+		s.repo.CleanupStaleRecords()
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	c.Start()
+
+	return c, nil
 }

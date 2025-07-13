@@ -10,6 +10,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"gorm.io/gorm"
 )
 
 func TestClickStatRepo(t *testing.T) {
@@ -45,6 +46,17 @@ func TestClickStatRepo(t *testing.T) {
 		today := time.Now().Truncate(24 * time.Hour).UTC()
 		assert.Equal(t, today, stats[len(stats)-1].Day)
 		assert.Equal(t, int64(51), stats[len(stats)-1].Count)
+
+		// CleanupStaleRecords
+		err = db.Session(&gorm.Session{AllowGlobalUpdate: true}).
+			Model(&model.ClickStat{}).Update("created_at", time.Now().AddDate(0, 0, -31)).Error
+		require.NoError(t, err)
+		err = repo.CleanupStaleRecords()
+		assert.NoError(t, err)
+		var records []model.ClickStat
+		err = db.Model(&model.ClickStat{}).Find(&records).Error
+		assert.NoError(t, err)
+		assert.Len(t, records, 0)
 	})
 
 	t.Run("error", func(t *testing.T) {

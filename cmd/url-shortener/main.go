@@ -52,6 +52,13 @@ func main() {
 	urlService := url.New(urlRepo, log)
 	clickStatService := clickstat.New(clickStatRepo, log)
 
+	// init click stats cleanup
+	_, err = clickStatService.CleanupStaleRecords()
+	if err != nil {
+		log.Error("failed to schedule cleanup job", sl.Err(err))
+		return
+	}
+
 	// init http server
 	router := http_server.NewRouter(log, &handler.Dependencies{JwtService: jwtService, AuthService: authService, UrlService: urlService, ClickStatService: clickStatService})
 

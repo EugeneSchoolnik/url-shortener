@@ -1,6 +1,7 @@
 package repo
 
 import (
+	"log"
 	"time"
 	"url-shortener/internal/model"
 
@@ -36,6 +37,13 @@ func (r *ClickStatRepo) ByUrlID(urlID, userID string) ([]DailyCount, error) {
 		Scan(&results).Error
 
 	return results, err
+}
+
+func (r *ClickStatRepo) CleanupStaleRecords() error {
+	result := r.db.Where("created_at < now() - interval '30 days'").Delete(&model.ClickStat{})
+	log.Printf("Deleted %d old events\n", result.RowsAffected)
+
+	return result.Error
 }
 
 // func fillEmptyDays(stats []DailyCount) []DailyCount {
