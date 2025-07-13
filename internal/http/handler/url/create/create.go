@@ -18,6 +18,18 @@ type UrlCreator interface {
 	Create(urlDto *dto.CreateUrl, userID string) (*model.Url, error)
 }
 
+// @Summary Create a short url
+// @Tags url
+// @Accept  json
+// @Produce  json
+// @Param request body Request true "alias is optional"
+// @Success 201  {object}  SuccessResponse
+// @Failure 400  {object}  api.ErrorResponse
+// @Failure 401  {object}  api.ErrorResponse
+// @Failure 409  {object}  api.ErrorResponse
+// @Failure 422  {object}  api.ErrorResponse
+// @Router /url [post]
+// @Security Bearer
 func New(log *slog.Logger, urlCreator UrlCreator) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		log = log.With(slog.String("op", "handler.url.create"))

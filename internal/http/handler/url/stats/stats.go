@@ -15,6 +15,14 @@ type StatsGetter interface {
 	Stats(urlID string, userID string) ([]repo.DailyCount, error)
 }
 
+// @Summary Get user's url stats
+// @Tags url
+// @Produce  json
+// @Param id path int true "short url id"
+// @Success 200  {object}  SuccessResponse
+// @Failure 404  {object}  api.ErrorResponse
+// @Router /url/{id} [get]
+// @Security Bearer
 func New(log *slog.Logger, statsGetter StatsGetter) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		log = log.With(slog.String("op", "handler.url.stats"))

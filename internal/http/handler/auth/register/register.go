@@ -23,6 +23,15 @@ type UserRegistrar interface {
 	Register(userDto *dto.CreateUser) (*model.User, string, error)
 }
 
+// @Summary Registers the user
+// @Tags auth
+// @Accept  json
+// @Produce  json
+// @Param request body Request true "Register credentials"
+// @Success 201  {object}  SuccessResponse
+// @Failure 400  {object}  api.ErrorResponse
+// @Failure 409  {object}  api.ErrorResponse
+// @Router /auth/register [post]
 func New(log *slog.Logger, userRegisterer UserRegistrar) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		const op = "handler.auth.register"

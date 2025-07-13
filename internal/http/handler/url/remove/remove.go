@@ -12,6 +12,14 @@ type UrlDeleter interface {
 	Delete(id, userID string) error
 }
 
+// @Summary Remove user's short url
+// @Tags url
+// @Produce  json
+// @Param id path int true "short url id"
+// @Success 200
+// @Failure 401  {object}  api.ErrorResponse
+// @Router /url/{id} [delete]
+// @Security Bearer
 func New(log *slog.Logger, urlDeleter UrlDeleter) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		log = log.With(slog.String("op", "handler.url.remove"))
